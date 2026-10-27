@@ -83,6 +83,8 @@ button{cursor:pointer}
 .capture{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 6px 6px 12px}
 .capture input{flex:1;min-width:0;border:0;background:transparent;padding:10px 4px;font-size:16px;outline:none}
 .capture button{border:0;background:var(--accent);color:var(--on-accent);border-radius:11px;padding:10px 18px;font-weight:800;white-space:nowrap}
+.capture-hint{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-12px 0 0 14px;font-size:13px;font-weight:700;color:var(--muted)}
+.capture-hint .badge{font-size:11.5px}
 .status{font-size:13px;color:var(--muted);margin:0}
 .status.warn{color:var(--danger)}
 
@@ -98,9 +100,26 @@ button{cursor:pointer}
 .login .msg.warn{color:var(--danger)}
 
 /* Rejilla principal */
-.layout{display:grid;gap:22px;grid-template-areas:"hoy" "rec" "week" "sin"}
-@media (min-width:1180px){.layout{grid-template-columns:360px minmax(0,1fr);grid-template-areas:"hoy week" "rec week" "sin week";grid-template-rows:auto auto 1fr;align-items:start}}
-.sec-hoy{grid-area:hoy}.sec-rec{grid-area:rec}.sec-week{grid-area:week}.sec-sin{grid-area:sin}
+.layout{display:grid;gap:22px;grid-template-areas:"hoy" "hab" "rec" "week" "sin"}
+@media (min-width:1180px){.layout{grid-template-columns:360px minmax(0,1fr);grid-template-areas:"hoy week" "hab week" "rec week" "sin week";grid-template-rows:auto auto auto 1fr;align-items:start}}
+.sec-hoy{grid-area:hoy}.sec-hab{grid-area:hab}.sec-rec{grid-area:rec}.sec-week{grid-area:week}.sec-sin{grid-area:sin}
+
+/* Hábitos */
+.habit{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
+.habit-top{display:flex;align-items:center;gap:8px}
+.habit-top img{width:22px;height:22px}
+.habit-top strong{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-weight:650;font-size:17px}
+.streak{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;background:var(--sunk);border-radius:99px;padding:3px 10px 3px 6px;font-variant-numeric:tabular-nums}
+.streak img{width:16px;height:16px}
+.dots{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dot{aspect-ratio:1;width:100%;max-width:34px;justify-self:center;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:800;color:var(--muted);border:1.5px solid var(--line);background:transparent}
+.dot.done{background:var(--hc);border-color:var(--hc);color:var(--on-area)}
+.dot.skip{background:var(--sunk);border-style:dotted;border-color:var(--muted)}
+.dot.miss{border-style:dashed;opacity:.8}
+.dot.today{border:2px solid var(--hl);color:var(--ink)}
+.dot.off{opacity:.3;border-color:transparent}
+.habit-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);font-weight:700}
+.habit-foot a{margin-left:auto;text-decoration:none;color:var(--ink)}
 section{min-width:0}
 .sec-head{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
 .sec-head h2{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-weight:600;font-size:21px;margin:0;letter-spacing:-.01em}
@@ -125,6 +144,10 @@ section{min-width:0}
 .progress{height:6px;border-radius:99px;background:var(--sunk);overflow:hidden;margin-top:6px}
 .progress span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
 .sec-hoy .card{background:var(--bg)}
+.group-head{display:flex;align-items:center;gap:7px;margin-top:6px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.group-head:first-child{margin-top:0}
+.group-head img{width:17px;height:17px}
+.group-head span{margin-left:auto;letter-spacing:0;font-variant-numeric:tabular-nums}
 .soon{display:grid;gap:3px;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1.5px dashed var(--danger)}
 .soon-title{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--danger)}
 .soon-row{display:flex;gap:10px;align-items:baseline;border:0;background:transparent;padding:3px 0;text-align:left;font-weight:700;font-size:14px;min-width:0}
@@ -251,6 +274,14 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 .aviso-actions .primary{color:var(--on-accent)}
 .aviso-actions img{width:18px;height:18px}
 .aviso-actions .textbtn{justify-self:center}
+.aviso-items{display:grid;gap:8px;text-align:left}
+.aviso-item{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px}
+.aviso-item>img{width:28px;height:28px;grid-row:span 2}
+.aviso-item strong{font-size:15.5px}
+.aviso-item .tip{font-size:12.5px;color:var(--muted);font-weight:600}
+.aviso-item .row{grid-column:1/-1;gap:6px;margin-top:6px}
+.aviso-item .row .primary{padding:8px 14px}
+.aviso-item .row a.mini{text-decoration:none;color:var(--ink)}
 
 /* Refuerzo positivo: ventana sin bloquear la página y hojitas cayendo encima */
 #festejo{position:fixed;inset:auto;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;z-index:25;width:min(360px,calc(100vw - 32px));border:2px solid var(--hl)}
@@ -368,9 +399,10 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 
   <form class="capture" id="capture" autocomplete="off">
     <img class="ico" src="img/paw_prints_flat.svg" alt="">
-    <input id="capture-input" type="text" placeholder="Anota algo rápido… (luego lo acomodas)" aria-label="Nuevo pendiente" enterkeyhint="done">
+    <input id="capture-input" type="text" placeholder="Anota algo… ej. «entregar reporte jueves #uni !»" aria-label="Nuevo pendiente" enterkeyhint="done">
     <button type="submit" id="capture-btn">Anotar</button>
   </form>
+  <p class="capture-hint" id="capture-hint" hidden></p>
   <p class="status" id="status">Cargando tus pendientes…</p>
 
   <div class="layout">
@@ -388,6 +420,11 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
       </div>
       <div class="soon" id="hoy-soon" hidden></div>
       <div class="stack" id="hoy-list"></div>
+    </section>
+
+    <section class="sec-hab" aria-labelledby="h-hab">
+      <div class="sec-head"><img class="ico" src="img/glowing_star_flat.svg" alt=""><h2 id="h-hab">Hábitos</h2></div>
+      <div class="stack" id="hab-list"></div>
     </section>
 
     <section class="sec-rec" aria-labelledby="h-rec">
@@ -482,13 +519,11 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 <dialog id="aviso">
   <div class="aviso-box">
     <img class="cat" src="img/black_cat_flat.svg" alt="">
-    <span class="eyebrow"><img src="img/crescent_moon_flat.svg" alt="">Recordatorio amigable</span>
-    <h3 id="aviso-title">¿Un ratito de ejercicio?</h3>
+    <span class="eyebrow"><img src="img/crescent_moon_flat.svg" alt="">Rutina de noche</span>
+    <h3 id="aviso-title">Tu rutina de noche</h3>
     <p id="aviso-text"></p>
+    <div class="aviso-items" id="aviso-items"></div>
     <div class="aviso-actions">
-      <button type="button" class="primary" id="aviso-done">Ya lo hice</button>
-      <a class="ghost" id="aviso-open" href="https://alexia-sv.github.io/Band-Bloom/" target="_blank" rel="noopener"><img src="img/flexed_biceps_flat.svg" alt="">Abrir Band&amp;Bloom</a>
-      <button type="button" class="ghost" id="aviso-rest">Hoy descanso</button>
       <button type="button" class="textbtn" id="aviso-later">Recuérdame en 30 min</button>
     </div>
   </div>
@@ -515,18 +550,38 @@ const SUPABASE_URL = "https://yuusedshkqztfzofcasq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_oo5Z5WAO6dC4uE4LjcXEZA_NtGS3w_o";
 
 const AREAS = {
-  casa: { label: "Casa", icon: "img/house_with_garden_flat.svg", subs: ["Pendientes", "Personal", "Ejercicio"] },
+  casa: { label: "Casa", icon: "img/house_with_garden_flat.svg", subs: ["Pendientes", "Personal", "Ejercicio", "Cuidado"] },
   uni: { label: "Uni", icon: "img/graduation_cap_flat.svg", subs: ["Tareas", "Proyectos", "Eventos", "Encuestas", "Titulación", "Tesina"] },
   trabajo: { label: "Trabajo", icon: "img/laptop_flat.svg", subs: ["CoCloset", "Simcha", "General"] },
 };
 const NO_AREA_ICON = "img/seedling_flat.svg";
-// El pendiente de ejercicio es el de Casa · Ejercicio; el aviso sale desde esta hora si no está hecho.
-const EJERCICIO = { sub: "Ejercicio", hora: 23, icon: "img/flexed_biceps_flat.svg" };
+// Hábitos de la rutina de noche. Cada uno es un pendiente que se repite en Casa · <sub>;
+// desde `hora` sale el aviso si el de hoy no está marcado. `skip` es la salida amable de ese día.
+const BAND_BLOOM_URL = "https://alexia-sv.github.io/Band-Bloom/";
+const HABITOS = [
+  {
+    key: "ejercicio", sub: "Ejercicio", nombre: "Ejercicio", titulo: "Hacer ejercicio",
+    icon: "img/flexed_biceps_flat.svg", dias: [0, 1, 2, 3, 4, 5, 6], hora: 23, color: "var(--accent)",
+    nota: "Bloque desde las 11 p. m. con Band&Bloom", flag: "mi-semana-ejercicio-creado",
+    tip: "Aunque sean 10 minutos de movilidad, cuentan.",
+    racha: (n) => `${n} ${n === 1 ? "día" : "días"}`, rachaIcon: "img/fire_flat.svg",
+    skip: { label: "Hoy descanso", nota: "Hoy fue descanso 🌙", msg: "Descansar también cuenta 🌙" },
+    link: { label: "Band&Bloom", href: BAND_BLOOM_URL },
+  },
+  {
+    key: "desmaquillar", sub: "Cuidado", nombre: "Desmaquillarme", titulo: "Desmaquillarme",
+    icon: "img/lotion_bottle_flat.svg", dias: [0, 1, 2, 3, 4, 6], hora: 23, color: "var(--uni)",
+    nota: "Antes de dormir · toallitas o agua micelar en el buró", flag: "mi-semana-desmaquillar-creado",
+    tip: "Versión mínima: agua micelar y un algodón, 1 minuto.",
+    racha: (n) => `${n} ${n === 1 ? "noche" : "noches"}`, rachaIcon: "img/crescent_moon_flat.svg",
+    skip: { label: "Hoy no me maquillé", nota: "Hoy no me maquillé", msg: "Listo, hoy no toca 🌙" },
+  },
+];
 const AVISO_FRASES = [
-  "Son las {h} y todavía no marcas ejercicio. ¿Un ratito con tus ligas?",
-  "Tu bloque de ejercicio ya empezó. Aunque sean 10 minutos, cuentan.",
-  "Monis ya se estiró. ¿Te toca a ti?",
-  "Movilidad suavecita también vale. Tu cuerpo te lo agradece.",
+  "Son las {h}. Antes de dormir, tu rutina de noche:",
+  "Tu bloque de la noche ya empezó. Poquito cuenta:",
+  "Monis ya se está acomodando para dormir. ¿Te falta algo?",
+  "Un último empujoncito y a descansar:",
 ];
 const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const DIAS_L = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
@@ -547,7 +602,9 @@ const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path
 const pad = (n) => String(n).padStart(2, "0");
 const keyOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const parseKey = (k) => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
-const todayKey = () => keyOf(new Date());
+// El día cambia a las 4 a. m., no a medianoche: lo que haces a las 12:30 a. m. todavía cuenta para hoy.
+const DIA_EMPIEZA = 4;
+const todayKey = () => keyOf(new Date(Date.now() - DIA_EMPIEZA * 3600000));
 const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); };
 const weekday = (k) => (parseKey(k).getDay() + 6) % 7; // 0 = lunes
 const mondayOf = (k) => addDays(k, -weekday(k));
@@ -603,18 +660,23 @@ async function loadAll() {
   loaded = true;
   setStatus("");
   render();
-  ensureExerciseTask();
+  ensureHabitTasks();
   checkAviso();
 }
 
-// La primera vez crea el pendiente diario de ejercicio (se puede editar o borrar como cualquier otro).
-function ensureExerciseTask() {
-  if ([...tasks.values()].some(isExercise)) return;
-  try {
-    if (localStorage.getItem("mi-semana-ejercicio-creado")) return;
-    localStorage.setItem("mi-semana-ejercicio-creado", "1");
-  } catch (e) {}
-  addTask({ titulo: "Hacer ejercicio", area: "casa", sub: EJERCICIO.sub, dia: todayKey(), repite: [0, 1, 2, 3, 4, 5, 6], nota: "Bloque desde las 11 p. m. con Band&Bloom" });
+// La primera vez crea el pendiente de cada hábito (se puede editar o borrar como cualquier otro).
+function ensureHabitTasks() {
+  const all = [...tasks.values()];
+  for (const h of HABITOS) {
+    if (all.some((t) => habitOf(t) === h)) continue;
+    try {
+      if (localStorage.getItem(h.flag)) continue;
+      localStorage.setItem(h.flag, "1");
+    } catch (e) {}
+    let dia = todayKey();
+    for (let i = 0; i < 7 && !h.dias.includes(weekday(dia)); i++) dia = addDays(dia, 1);
+    addTask({ titulo: h.titulo, area: "casa", sub: h.sub, dia, repite: [...h.dias], nota: h.nota });
+  }
 }
 
 // Una escritura a la vez por tarea; mientras haya escrituras pendientes no se recarga desde el servidor.
@@ -695,12 +757,24 @@ const sortItems = (a, b) =>
   (b.obligatorio ? 1 : 0) - (a.obligatorio ? 1 : 0) ||
   String(a.creada || "").localeCompare(String(b.creada || ""));
 
+// Orden de trabajo del día: Trabajo, Uni, Casa, sin área y al final la rutina de noche.
+const GRUPOS = [
+  { key: "trabajo", label: "Trabajo", icon: "img/laptop_flat.svg" },
+  { key: "uni", label: "Uni", icon: "img/graduation_cap_flat.svg" },
+  { key: "casa", label: "Casa", icon: "img/house_with_garden_flat.svg" },
+  { key: "none", label: "Sin área", icon: "img/seedling_flat.svg" },
+  { key: "noche", label: "Rutina de noche", icon: "img/crescent_moon_flat.svg" },
+];
+const groupKey = (t) => (habitOf(t) ? "noche" : t.area || "none");
+const groupRank = (t) => GRUPOS.findIndex((g) => g.key === groupKey(t));
+const sortGrouped = (a, b) => (a.hecho ? 1 : 0) - (b.hecho ? 1 : 0) || groupRank(a) - groupRank(b) || sortItems(a, b);
+
 function repLabel(rep) {
   if (rep.length === 7) return "diario";
   return [...rep].sort((a, b) => a - b).map((i) => DIAS[i]).join(" ");
 }
-const isExercise = (t) => t.area === "casa" && t.sub === EJERCICIO.sub;
-const areaIcon = (t) => (isExercise(t) ? EJERCICIO.icon : AREAS[t.area]?.icon || NO_AREA_ICON);
+const habitOf = (t) => (t.area === "casa" ? HABITOS.find((h) => h.sub === t.sub) : null) || null;
+const areaIcon = (t) => habitOf(t)?.icon || AREAS[t.area]?.icon || NO_AREA_ICON;
 
 function badge(t) {
   if (!t.area || !AREAS[t.area]) return `<span class="badge"><img src="${NO_AREA_ICON}" alt="">Sin área</span>`;
@@ -735,6 +809,7 @@ function card(t, mode) {
     actions = `<div class="actions">
       <button class="mini" data-act="prev" aria-label="Pasar al día anterior"${prevBlocked ? " disabled" : ""}>‹ Antes</button>
       <button class="mini" data-act="next" aria-label="Pasar al día siguiente">Después ›</button>
+      ${habitOf(t) ? `<button class="mini" data-act="skiphabit">${habitOf(t).skip.label}</button>` : ""}
     </div>`;
   } else if (mode === "inbox") {
     actions = `<div class="actions">${Object.keys(AREAS).map((a) =>
@@ -757,6 +832,54 @@ function card(t, mode) {
     ${extras.length ? `<div class="meta">${extras.join("")}</div>` : ""}
     ${actions}
   </article>`;
+}
+
+// ---------- hábitos: racha y semana ----------
+// Cada día programado cuenta como hecho, saltado (descanso / sin maquillaje), faltó, hoy o próximo.
+function habitData(h, list, today) {
+  const recs = list.filter((t) => habitOf(t) === h);
+  const open = recs.find((t) => !t.hecho);
+  const sched = open?.repite?.length ? open.repite : h.dias;
+  const starts = recs.map((t) => (t.creada ? keyOf(new Date(t.creada)) : t.dia)).filter(Boolean).sort();
+  const start = starts[0] || today;
+  const byDay = new Map();
+  for (const t of recs) if (t.hecho && t.dia) byDay.set(t.dia, t.nota === h.skip.nota ? "skip" : "done");
+  const status = (dk) => {
+    if (byDay.has(dk)) return byDay.get(dk);
+    if (!sched.includes(weekday(dk)) || dk < start) return "off";
+    if (dk < today) return "miss";
+    return dk === today ? "today" : "next";
+  };
+  let racha = 0;
+  let dk = ["done", "skip"].includes(status(today)) ? today : addDays(today, -1);
+  for (let i = 0; i < 400 && dk >= start; i++, dk = addDays(dk, -1)) {
+    const s = status(dk);
+    if (s === "done") racha++;
+    else if (s === "miss") break;
+  }
+  const mes = today.slice(0, 7);
+  const enMes = [...byDay].filter(([d, s]) => s === "done" && d.startsWith(mes)).length;
+  return { status, racha, enMes };
+}
+
+function renderHabitos(list, today) {
+  const lunes = mondayOf(today);
+  const LABEL = { done: "hecho", skip: "saltado", miss: "faltó", today: "hoy", next: "pendiente", off: "no toca" };
+  $("hab-list").innerHTML = HABITOS.map((h) => {
+    const { status, racha, enMes } = habitData(h, list, today);
+    const dots = DIAS.map((d, i) => {
+      const dk = addDays(lunes, i);
+      const s = status(dk);
+      return `<span class="dot ${s}" title="${d} ${parseKey(dk).getDate()}: ${LABEL[s]}">${s === "done" ? "✓" : d[0]}</span>`;
+    }).join("");
+    const link = h.link ? `<a class="mini" href="${h.link.href}" target="_blank" rel="noopener">${h.link.label} ↗</a>` : "";
+    return `<div class="habit" style="--hc:${h.color}">
+      <div class="habit-top"><img src="${h.icon}" alt=""><strong>${h.nombre}</strong>
+        <span class="streak"><img src="${h.rachaIcon}" alt="">${racha ? h.racha(racha) : "empieza hoy"}</span></div>
+      <div class="dots" aria-label="Esta semana">${dots}</div>
+      <div class="habit-foot"><span>${enMes} este mes</span>${link}</div>
+    </div>`;
+  }).join("");
 }
 
 // "mañana", "en 3 días · jue"
@@ -791,6 +914,8 @@ function render() {
   $("hoy-count").textContent = hoy.length ? `${hechas} de ${hoy.length} hechas` : "";
   $("hoy-carry").textContent = arrastradas ? `· ${arrastradas} ${arrastradas === 1 ? "viene" : "vienen"} de días anteriores` : "";
   $("hoy-bar").style.width = hoy.length ? `${Math.round((hechas / hoy.length) * 100)}%` : "0";
+  renderHabitos(list, today);
+
   // Se acerca: obligatorios de los próximos 7 días, para verlos venir
   const limite = addDays(today, 7);
   const soon = list.filter((t) => t.obligatorio && !t.hecho && t.dia && t.dia > today && t.dia <= limite)
@@ -802,7 +927,13 @@ function render() {
       (soon.length > 4 ? `<span class="soft">y ${soon.length - 4} más en la semana</span>` : "")
     : "";
   $("hoy-list").innerHTML = !loaded ? emptyBox("img/teacup_without_handle_flat.svg", "Cargando…")
-    : hoy.length ? hoy.map((t) => card(t, "hoy")).join("")
+    : hoy.length ? GRUPOS.map((g) => {
+        const items = hoy.filter((t) => groupKey(t) === g.key);
+        if (!items.length) return "";
+        const hechasG = items.filter((t) => t.hecho).length;
+        return `<div class="group-head"><img src="${g.icon}" alt="">${g.label}<span>${hechasG}/${items.length}</span></div>` +
+          items.map((t) => card(t, "hoy")).join("");
+      }).join("")
     : emptyBox("img/black_cat_flat.svg", "Nada para hoy. Toca “Hoy” en Sin día o el + de un día.");
 
   // Recientes
@@ -818,7 +949,7 @@ function render() {
   let html = "";
   for (let i = 0; i < 7; i++) {
     const dk = addDays(weekStart, i);
-    const items = list.filter((t) => t._day === dk).sort(sortItems);
+    const items = list.filter((t) => t._day === dk).sort(sortGrouped);
     const cls = dk === today ? " today" : dk < today ? " past" : "";
     html += `<div class="day${cls}" data-drop="${dk}">
       <div class="day-head">
@@ -833,7 +964,7 @@ function render() {
 
   // Sin día
   const sinAll = list.filter((t) => t.area && !t.dia && !t.hecho);
-  const sin = sinAll.filter((t) => sinTab === "todas" || t.area === sinTab).sort(sortItems);
+  const sin = sinAll.filter((t) => sinTab === "todas" || t.area === sinTab).sort(sortGrouped);
   $("sin-count").textContent = sinAll.length;
   document.querySelectorAll("#sin-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === sinTab)));
   $("sin-list").innerHTML = sin.length ? sin.map((t) => card(t, "backlog")).join("")
@@ -886,7 +1017,7 @@ function patchUndoable(id, data, msg) {
   toast(msg, () => patch(id, prev));
 }
 
-function completeUndoable(id, extra) {
+function completeUndoable(id, extra, msg) {
   const before = tasks.get(id); if (!before) return;
   toggleDone(id, extra);
   if (before.hecho) {
@@ -894,7 +1025,7 @@ function completeUndoable(id, extra) {
     return;
   }
   const after = tasks.get(id);
-  toast(extra ? "Descansar también cuenta 🌙" : "¡Hecho!", () => {
+  toast(msg || "¡Hecho!", () => {
     if (after?.siguiente) { const nx = tasks.get(after.siguiente); if (nx && !nx.hecho) removeTask(after.siguiente); }
     patch(id, { hecho: false, hechaEn: null, dia: before.dia ?? null, nota: before.nota ?? "", siguiente: before.siguiente ?? null });
   });
@@ -946,6 +1077,11 @@ document.addEventListener("click", (e) => {
       document.querySelector(".day.today")?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       break;
     case "done": completeUndoable(id); break;
+    case "skiphabit": {
+      const h = habitOf(tasks.get(id) || {});
+      if (h) completeUndoable(id, { nota: h.skip.nota }, h.skip.msg);
+      break;
+    }
     case "prev": moveBy(id, -1); break;
     case "next": moveBy(id, 1); break;
     case "area": patchUndoable(id, { area: el.dataset.area }, `Movido a ${AREAS[el.dataset.area].label}`); break;
@@ -962,15 +1098,88 @@ $("theme-btn").addEventListener("click", () => {
   syncThemeIcon();
 });
 
-// Captura rápida
+// ---------- captura inteligente ----------
+// "entregar reporte jueves #uni !" → día jueves, área Uni, obligatorio. Lo que no reconoce se queda en el título.
+const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const DIA_NOMBRES = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"];
+const TAG_ALIAS = { universidad: "uni", escuela: "uni", chamba: "trabajo", work: "trabajo", hogar: "casa" };
+function matchTag(raw) {
+  const tag = TAG_ALIAS[raw] || raw;
+  if (AREAS[tag]) return { area: tag, sub: null };
+  for (const [area, a] of Object.entries(AREAS)) {
+    const sub = a.subs.find((s) => norm(s) === tag);
+    if (sub) return { area, sub };
+  }
+  return null;
+}
+function parseCapture(text) {
+  const out = { titulo: "", area: null, sub: null, dia: null, obligatorio: false };
+  const today = todayKey();
+  const words = text.trim().split(/\s+/);
+  const keep = [];
+  // Las palabras de día después de "de/del" son parte del título ("comida de mañana").
+  const afterDe = () => ["de", "del"].includes(norm(keep[keep.length - 1] || ""));
+  const dropConnectors = () => { while (keep.length && ["el", "para", "antes", "del"].includes(norm(keep[keep.length - 1]))) keep.pop(); };
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    const n = norm(w).replace(/[.,;:]+$/, "");
+    if (/^!+$/.test(n)) { out.obligatorio = true; continue; }
+    if (n.startsWith("#") && n.length > 1) {
+      const tag = matchTag(n.slice(1));
+      if (tag) { out.area = tag.area; out.sub = tag.sub; continue; }
+    }
+    if (!out.dia && !afterDe()) {
+      let dia = null;
+      if (n === "pasado" && norm(words[i + 1] || "").replace(/[.,;:!]+$/, "") === "manana") { dia = addDays(today, 2); i++; }
+      else if (n === "hoy") dia = today;
+      else if (n === "manana") dia = addDays(today, 1);
+      else if (DIA_NOMBRES.includes(n)) dia = addDays(today, (DIA_NOMBRES.indexOf(n) - weekday(today) + 7) % 7 || 7);
+      else {
+        const m = n.match(/^(\d{1,2})\/(\d{1,2})$/);
+        if (m && +m[2] >= 1 && +m[2] <= 12 && +m[1] >= 1 && +m[1] <= 31) {
+          const y = parseKey(today).getFullYear();
+          let k = `${y}-${pad(+m[2])}-${pad(+m[1])}`;
+          if (k < today) k = `${y + 1}-${pad(+m[2])}-${pad(+m[1])}`;
+          dia = k;
+        }
+      }
+      if (dia) { out.dia = dia; dropConnectors(); continue; }
+    }
+    if (w.length > 1 && w.endsWith("!")) { out.obligatorio = true; keep.push(w.replace(/!+$/, "")); continue; }
+    keep.push(w);
+  }
+  dropConnectors();
+  out.titulo = keep.join(" ").trim();
+  return out;
+}
+function describeCapture(p) {
+  const bits = [];
+  if (p.dia) bits.push(`📅 ${dayLabel(p.dia)}`);
+  if (p.area) bits.push(badge(p));
+  if (p.obligatorio) bits.push('<span class="flag">⚑ obligatorio</span>');
+  return bits;
+}
+$("capture-input").addEventListener("input", (e) => {
+  const p = parseCapture(e.target.value);
+  const bits = e.target.value.trim() ? describeCapture(p) : [];
+  $("capture-hint").hidden = !bits.length;
+  $("capture-hint").innerHTML = bits.length ? `→ ${bits.join(" ")}` : "";
+});
 $("capture").addEventListener("submit", (e) => {
   e.preventDefault();
   const input = $("capture-input");
-  const titulo = input.value.trim();
-  if (!titulo) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const p = parseCapture(text);
+  if (!p.titulo) p.titulo = text;
   input.value = "";
-  addTask({ titulo });
-  toast("Anotado en Recientes");
+  $("capture-hint").hidden = true;
+  const id = crypto.randomUUID();
+  insertTask(id, { titulo: "", area: null, sub: null, dia: null, hecho: false, hechaEn: null, obligatorio: false, nota: "", repite: [], siguiente: null, creada: new Date().toISOString(), ...p });
+  const donde = p.area || p.dia
+    ? `Anotado: ${p.dia ? dayLabel(p.dia) : "Sin día"}${p.area ? ` · ${AREAS[p.area].label}` : ""}`
+    : "Anotado en Recientes";
+  toast(donde, () => removeTask(id));
   input.focus();
 });
 
@@ -1059,41 +1268,61 @@ $("ed-form").addEventListener("submit", (e) => {
   else { addTask(data); toast("Agregado"); }
 });
 
-// ---------- aviso amigable de ejercicio ----------
-// Sale con la app abierta (o al volver a ella) desde las 11 p. m. si el ejercicio de hoy no está marcado.
+// ---------- rutina de noche ----------
+// Un solo aviso con los hábitos de hoy que faltan, desde su hora y mientras la app esté abierta
+// (o al volver a ella). Si queda alguno, vuelve a preguntar cada 30 min.
 const AVISO_KEY = "mi-semana-aviso-pospuesto";
 const dlgAviso = $("aviso");
-let avisoId = null;
-function pendingExercise() {
+// Hora "de la noche" contada desde que empieza el día (4 a. m.), así las 12:30 a. m. siguen siendo hoy.
+const nightHour = (d) => (d.getHours() - DIA_EMPIEZA + 24) % 24 + DIA_EMPIEZA;
+function pendingHabits(force) {
   const today = todayKey();
-  return decorate().find((t) => isExercise(t) && t._day === today && !t.hecho);
+  const h = nightHour(new Date());
+  return decorate().filter((t) => {
+    const hab = habitOf(t);
+    return hab && t._day === today && !t.hecho && (force || h >= hab.hora);
+  });
 }
 function snoozedUntil() {
   try { return Number(localStorage.getItem(AVISO_KEY)) || 0; } catch (e) { return 0; }
 }
+function renderAvisoItems() {
+  const items = pendingHabits(true).filter((t) => avisoIds.includes(t.id));
+  $("aviso-items").innerHTML = items.map((t) => {
+    const h = habitOf(t);
+    const link = h.link ? `<a class="mini" href="${h.link.href}" target="_blank" rel="noopener" data-aviso="link">${h.link.label} ↗</a>` : "";
+    return `<div class="aviso-item" data-id="${esc(t.id)}">
+      <img src="${h.icon}" alt=""><strong>${esc(t.titulo)}</strong><span class="tip">${h.tip}</span>
+      <div class="row"><button type="button" class="primary" data-aviso="done">Hecho</button>
+        <button type="button" class="mini" data-aviso="skip">${h.skip.label}</button>${link}</div>
+    </div>`;
+  }).join("");
+  return items.length;
+}
+let avisoIds = [];
 function checkAviso(force) {
   if (!loaded || dlgAviso.open || dlg.open) return;
+  if (!force && Date.now() < snoozedUntil()) return;
+  const items = pendingHabits(force); if (!items.length) return;
+  avisoIds = items.map((t) => t.id);
   const now = new Date();
-  if (!force && (now.getHours() < EJERCICIO.hora || Date.now() < snoozedUntil())) return;
-  const t = pendingExercise(); if (!t) return;
-  avisoId = t.id;
   const hora = `${now.getHours() % 12 || 12}:${pad(now.getMinutes())} ${now.getHours() < 12 ? "a. m." : "p. m."}`;
   $("aviso-text").textContent = AVISO_FRASES[dayOfYear(todayKey()) % AVISO_FRASES.length].replace("{h}", hora);
+  renderAvisoItems();
   dlgAviso.showModal();
 }
 function snoozeAviso(minutes) {
   try { localStorage.setItem(AVISO_KEY, String(Date.now() + minutes * 60000)); } catch (e) {}
 }
-$("aviso-done").addEventListener("click", () => {
-  dlgAviso.close();
-  if (avisoId) completeUndoable(avisoId);
+$("aviso-items").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-aviso]"); if (!b) return;
+  const id = b.closest("[data-id]").dataset.id;
+  const h = habitOf(tasks.get(id) || {});
+  if (b.dataset.aviso === "link") { snoozeAviso(30); dlgAviso.close(); return; } // vuelve a preguntar al rato
+  if (b.dataset.aviso === "done") completeUndoable(id);
+  if (b.dataset.aviso === "skip" && h) completeUndoable(id, { nota: h.skip.nota }, h.skip.msg);
+  if (!renderAvisoItems()) dlgAviso.close();
 });
-$("aviso-rest").addEventListener("click", () => {
-  dlgAviso.close();
-  if (avisoId) completeUndoable(avisoId, { nota: "Hoy fue descanso 🌙" });
-});
-// Al ir a Band&Bloom, vuelve a preguntar en 30 min por si ya terminaste.
-$("aviso-open").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
 $("aviso-later").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
 dlgAviso.addEventListener("cancel", () => snoozeAviso(30));
 
@@ -1211,6 +1440,7 @@ if (DEMO) {
   const t0 = todayKey();
   const demo = [
     ["Hacer ejercicio", "casa", "Ejercicio", t0, false, [0, 1, 2, 3, 4, 5, 6]],
+    ["Desmaquillarme", "casa", "Cuidado", t0, false, [0, 1, 2, 3, 4, 6]],
     ["Limpiar la arena de Monis", "casa", "Pendientes", t0, false, [0, 1, 2, 3, 4, 5, 6]],
     ["Revisar el ticket de emails", "trabajo", "CoCloset", t0, true, []],
     ["Entregar documentación del videojuego", "uni", "Proyectos", addDays(t0, 1), false, [], true],
@@ -1220,8 +1450,12 @@ if (DEMO) {
     ["Verificar la PWA de Xóchitl", "uni", "Proyectos", null, false, []],
     ["Comprar arena", null, null, null, false, []],
   ];
+  const hace = (n) => new Date(Date.now() - n * 864e5).toISOString();
   demo.forEach(([titulo, area, sub, dia, hecho, repite, obligatorio], i) =>
-    tasks.set("demo" + i, { titulo, area, sub, dia, hecho, repite, obligatorio: !!obligatorio, nota: "", creada: String(i) }));
+    tasks.set("demo" + i, { titulo, area, sub, dia, hecho, hechaEn: hecho ? t0 : null, repite, obligatorio: !!obligatorio, nota: "", creada: hace(6) }));
+  // Historial de hábitos de los últimos días para ver rachas y puntitos.
+  [[1, "Ejercicio", ""], [2, "Ejercicio", "Hoy fue descanso 🌙"], [3, "Ejercicio", ""], [1, "Cuidado", ""], [2, "Cuidado", ""], [4, "Cuidado", "Hoy no me maquillé"]]
+    .forEach(([n, sub, nota], i) => tasks.set("demoh" + i, { titulo: sub === "Ejercicio" ? "Hacer ejercicio" : "Desmaquillarme", area: "casa", sub, dia: addDays(t0, -n), hecho: true, hechaEn: addDays(t0, -n), repite: [], obligatorio: false, nota, creada: hace(6) }));
   loaded = true;
   setStatus("");
   $("login").hidden = true; $("app").hidden = false;
