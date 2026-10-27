@@ -74,6 +74,9 @@ button{cursor:pointer}
 .pill{font-size:12.5px;font-weight:700;color:var(--muted);background:var(--sunk);border-radius:99px;padding:4px 10px;font-variant-numeric:tabular-nums}
 .iconbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0}
 .iconbtn:hover{background:var(--sunk)}
+.exbtn{display:inline-flex;align-items:center;gap:6px;height:34px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 12px 0 9px;font-size:13px;font-weight:800;color:var(--ink);text-decoration:none}
+.exbtn:hover{background:var(--sunk)}
+.exbtn img{width:18px;height:18px}
 .textbtn{border:0;background:transparent;color:var(--muted);font-size:13px;font-weight:600;padding:6px 8px;border-radius:8px}
 .textbtn:hover{background:var(--sunk);color:var(--ink)}
 
@@ -230,6 +233,19 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 .danger.armed{border-color:var(--danger)}
 .spacer{flex:1}
 
+/* Aviso amigable de ejercicio */
+#aviso{width:min(380px,calc(100vw - 32px))}
+.aviso-box{display:grid;gap:12px;padding:24px 20px 20px;text-align:center}
+.aviso-box .cat{width:68px;height:68px;justify-self:center}
+.aviso-box .eyebrow{justify-self:center}
+.aviso-box h3{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-weight:650;font-size:24px;margin:0;line-height:1.15}
+.aviso-box p{margin:0;color:var(--muted);font-weight:600}
+.aviso-actions{display:grid;gap:8px;margin-top:4px}
+.aviso-actions .primary,.aviso-actions .ghost{width:100%;padding:11px 16px;font-size:15px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;color:inherit}
+.aviso-actions .primary{color:var(--on-accent)}
+.aviso-actions img{width:18px;height:18px}
+.aviso-actions .textbtn{justify-self:center}
+
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;z-index:20;max-width:calc(100vw - 32px)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -328,6 +344,7 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
       </div>
       <div class="tools">
         <span class="pill" id="today-week"></span>
+        <a class="exbtn" href="https://alexia-sv.github.io/Band-Bloom/" target="_blank" rel="noopener"><img src="img/flexed_biceps_flat.svg" alt="">Ejercicio</a>
         <button class="iconbtn" id="theme-btn" type="button" aria-label="Cambiar tema"><img class="ico" id="theme-ico" src="img/crescent_moon_flat.svg" alt=""></button>
         <button class="textbtn" id="logout" type="button">Salir</button>
       </div>
@@ -446,6 +463,21 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
   </form>
 </dialog>
 
+<dialog id="aviso">
+  <div class="aviso-box">
+    <img class="cat" src="img/black_cat_flat.svg" alt="">
+    <span class="eyebrow"><img src="img/crescent_moon_flat.svg" alt="">Recordatorio amigable</span>
+    <h3 id="aviso-title">¿Un ratito de ejercicio?</h3>
+    <p id="aviso-text"></p>
+    <div class="aviso-actions">
+      <button type="button" class="primary" id="aviso-done">Ya lo hice</button>
+      <a class="ghost" id="aviso-open" href="https://alexia-sv.github.io/Band-Bloom/" target="_blank" rel="noopener"><img src="img/flexed_biceps_flat.svg" alt="">Abrir Band&amp;Bloom</a>
+      <button type="button" class="ghost" id="aviso-rest">Hoy descanso</button>
+      <button type="button" class="textbtn" id="aviso-later">Recuérdame en 30 min</button>
+    </div>
+  </div>
+</dialog>
+
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -455,11 +487,19 @@ const SUPABASE_URL = "https://yuusedshkqztfzofcasq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_oo5Z5WAO6dC4uE4LjcXEZA_NtGS3w_o";
 
 const AREAS = {
-  casa: { label: "Casa", icon: "img/house_with_garden_flat.svg", subs: ["Pendientes", "Personal"] },
+  casa: { label: "Casa", icon: "img/house_with_garden_flat.svg", subs: ["Pendientes", "Personal", "Ejercicio"] },
   uni: { label: "Uni", icon: "img/graduation_cap_flat.svg", subs: ["Tareas", "Proyectos", "Eventos", "Encuestas", "Titulación", "Tesina"] },
   trabajo: { label: "Trabajo", icon: "img/laptop_flat.svg", subs: ["CoCloset", "Simcha", "General"] },
 };
 const NO_AREA_ICON = "img/seedling_flat.svg";
+// El pendiente de ejercicio es el de Casa · Ejercicio; el aviso sale desde esta hora si no está hecho.
+const EJERCICIO = { sub: "Ejercicio", hora: 23, icon: "img/flexed_biceps_flat.svg" };
+const AVISO_FRASES = [
+  "Son las {h} y todavía no marcas ejercicio. ¿Un ratito con tus ligas?",
+  "Tu bloque de ejercicio ya empezó. Aunque sean 10 minutos, cuentan.",
+  "Monis ya se estiró. ¿Te toca a ti?",
+  "Movilidad suavecita también vale. Tu cuerpo te lo agradece.",
+];
 const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const DIAS_L = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -535,12 +575,25 @@ async function loadAll() {
   loaded = true;
   setStatus("");
   render();
+  ensureExerciseTask();
+  checkAviso();
+}
+
+// La primera vez crea el pendiente diario de ejercicio (se puede editar o borrar como cualquier otro).
+function ensureExerciseTask() {
+  if ([...tasks.values()].some(isExercise)) return;
+  try {
+    if (localStorage.getItem("mi-semana-ejercicio-creado")) return;
+    localStorage.setItem("mi-semana-ejercicio-creado", "1");
+  } catch (e) {}
+  addTask({ titulo: "Hacer ejercicio", area: "casa", sub: EJERCICIO.sub, dia: todayKey(), repite: [0, 1, 2, 3, 4, 5, 6], nota: "Bloque desde las 11 p. m. con Band&Bloom" });
 }
 
 // Una escritura a la vez por tarea; mientras haya escrituras pendientes no se recarga desde el servidor.
 const queues = {};
 let pending = 0;
 function write(id, fn) {
+  if (DEMO) return Promise.resolve(); // la vista de ejemplo no guarda nada
   pending++;
   const p = (queues[id] || Promise.resolve())
     .then(fn)
@@ -613,7 +666,8 @@ function repLabel(rep) {
   if (rep.length === 7) return "diario";
   return [...rep].sort((a, b) => a - b).map((i) => DIAS[i]).join(" ");
 }
-const areaIcon = (t) => (AREAS[t.area]?.icon || NO_AREA_ICON);
+const isExercise = (t) => t.area === "casa" && t.sub === EJERCICIO.sub;
+const areaIcon = (t) => (isExercise(t) ? EJERCICIO.icon : AREAS[t.area]?.icon || NO_AREA_ICON);
 
 function badge(t) {
   if (!t.area || !AREAS[t.area]) return `<span class="badge"><img src="${NO_AREA_ICON}" alt="">Sin área</span>`;
@@ -743,11 +797,12 @@ function addTask(data) {
   return insertTask(crypto.randomUUID(), body);
 }
 
-function toggleDone(id) {
+// `extra` cambia solo esta tarea (por ejemplo, la nota de descanso), no la siguiente que se repite.
+function toggleDone(id, extra = {}) {
   const t = tasks.get(id); if (!t) return;
   const today = todayKey();
   if (!t.hecho) {
-    const upd = { hecho: true, hechaEn: today };
+    const upd = { hecho: true, hechaEn: today, ...extra };
     if (!t.dia || t.dia < today) upd.dia = today;
     // Si se repite, crea la siguiente en el próximo día que le toca.
     const rep = Array.isArray(t.repite) ? t.repite : [];
@@ -918,6 +973,46 @@ $("ed-form").addEventListener("submit", (e) => {
   else { addTask(data); toast("Agregado"); }
 });
 
+// ---------- aviso amigable de ejercicio ----------
+// Sale con la app abierta (o al volver a ella) desde las 11 p. m. si el ejercicio de hoy no está marcado.
+const AVISO_KEY = "mi-semana-aviso-pospuesto";
+const dlgAviso = $("aviso");
+let avisoId = null;
+function pendingExercise() {
+  const today = todayKey();
+  return decorate().find((t) => isExercise(t) && t._day === today && !t.hecho);
+}
+function snoozedUntil() {
+  try { return Number(localStorage.getItem(AVISO_KEY)) || 0; } catch (e) { return 0; }
+}
+function checkAviso(force) {
+  if (!loaded || dlgAviso.open || dlg.open) return;
+  const now = new Date();
+  if (!force && (now.getHours() < EJERCICIO.hora || Date.now() < snoozedUntil())) return;
+  const t = pendingExercise(); if (!t) return;
+  avisoId = t.id;
+  const hora = `${now.getHours() % 12 || 12}:${pad(now.getMinutes())} ${now.getHours() < 12 ? "a. m." : "p. m."}`;
+  $("aviso-text").textContent = AVISO_FRASES[dayOfYear(todayKey()) % AVISO_FRASES.length].replace("{h}", hora);
+  dlgAviso.showModal();
+}
+function snoozeAviso(minutes) {
+  try { localStorage.setItem(AVISO_KEY, String(Date.now() + minutes * 60000)); } catch (e) {}
+}
+$("aviso-done").addEventListener("click", () => {
+  dlgAviso.close();
+  if (avisoId) toggleDone(avisoId);
+  toast("¡Bien hecho! 🐾");
+});
+$("aviso-rest").addEventListener("click", () => {
+  dlgAviso.close();
+  if (avisoId) toggleDone(avisoId, { nota: "Hoy fue descanso 🌙" });
+  toast("Descansar también cuenta 🌙");
+});
+// Al ir a Band&Bloom, vuelve a preguntar en 30 min por si ya terminaste.
+$("aviso-open").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
+$("aviso-later").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
+dlgAviso.addEventListener("cancel", () => snoozeAviso(30));
+
 // ---------- login con correo y contraseña ----------
 // La cuenta se crea desde el panel de Supabase; aquí solo se entra.
 function loginMsg(msg, warn) { const m = $("login-msg"); m.textContent = msg || ""; m.classList.toggle("warn", !!warn); }
@@ -934,7 +1029,7 @@ $("login-form").addEventListener("submit", async (e) => {
 });
 $("logout").addEventListener("click", () => sb.auth.signOut());
 
-const DEMO = location.hash === "#demo";
+const DEMO = location.hash.startsWith("#demo");
 function applySession(s) {
   if (DEMO) return;
   const had = !!session;
@@ -960,7 +1055,7 @@ function checkDayChange() {
 }
 syncThemeIcon();
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", syncThemeIcon);
-setInterval(() => { renderClock(); checkDayChange(); }, 30000);
+setInterval(() => { renderClock(); checkDayChange(); checkAviso(); }, 30000);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden || !session) return;
   checkDayChange();
@@ -975,6 +1070,7 @@ sb.auth.getSession().then(({ data }) => applySession(data.session));
 if (DEMO) {
   const t0 = todayKey();
   const demo = [
+    ["Hacer ejercicio", "casa", "Ejercicio", t0, false, [0, 1, 2, 3, 4, 5, 6]],
     ["Limpiar la arena de Monis", "casa", "Pendientes", t0, false, [0, 1, 2, 3, 4, 5, 6]],
     ["Revisar el ticket de emails", "trabajo", "CoCloset", t0, true, []],
     ["Entregar documentación del videojuego", "uni", "Proyectos", addDays(t0, 1), false, [], true],
@@ -990,6 +1086,7 @@ if (DEMO) {
   setStatus("");
   $("login").hidden = true; $("app").hidden = false;
   render();
+  if (location.hash === "#demo-aviso") checkAviso(true); // muestra el aviso sin esperar a las 11 p. m.
 }
 </script>
 </body>
