@@ -613,6 +613,7 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
     <p id="aviso-text"></p>
     <div class="aviso-items" id="aviso-items"></div>
     <div class="aviso-actions">
+      <button type="button" class="ghost" id="aviso-tired">🫶 Me siento cansada, fue un día pesado</button>
       <button type="button" class="textbtn" id="aviso-later">Recuérdame en 30 min</button>
     </div>
   </div>
@@ -976,6 +977,9 @@ function repLabel(rep) {
   if (rep.length === 7) return "diario";
   return [...rep].sort((a, b) => a - b).map((i) => DIAS[i]).join(" ");
 }
+// "Día pesado" desde la Rutina de noche: cuenta como descanso, igual que la salida de cada hábito.
+const NOTA_CANSADA = "Día pesado, descansé 🫶";
+const isRestNota = (h, nota) => nota === h.skip.nota || nota === NOTA_CANSADA;
 const habitOf = (t) => (t.area === "casa" ? HABITOS.find((h) => h.sub === t.sub) : null) || null;
 const areaIcon = (t) => habitOf(t)?.icon || AREAS[t.area]?.icon || NO_AREA_ICON;
 
@@ -1053,7 +1057,7 @@ function habitData(h, list, today) {
   const starts = recs.map((t) => (t.creada ? keyOf(new Date(t.creada)) : t.dia)).filter(Boolean).sort();
   const start = starts[0] || today;
   const byDay = new Map();
-  for (const t of recs) if (t.hecho && t.dia) byDay.set(t.dia, t.nota === h.skip.nota ? "skip" : "done");
+  for (const t of recs) if (t.hecho && t.dia) byDay.set(t.dia, isRestNota(h, t.nota) ? "skip" : "done");
   const status = (dk) => {
     if (byDay.has(dk)) return byDay.get(dk);
     if (!sched.includes(weekday(dk)) || dk < start) return "off";
@@ -1074,7 +1078,7 @@ function habitData(h, list, today) {
 
 function renderHabitos(list, today) {
   const lunes = mondayOf(today);
-  const LABEL = { done: "hecho", skip: "saltado", miss: "faltó", today: "hoy", next: "pendiente", off: "no toca" };
+  const LABEL = { done: "hecho", skip: "descanso", miss: "faltó", today: "hoy", next: "pendiente", off: "no toca" };
   $("hab-list").innerHTML = HABITOS.map((h) => {
     const { status, racha, enMes } = habitData(h, list, today);
     const dots = DIAS.map((d, i) => {
@@ -1268,12 +1272,15 @@ function completeUndoable(id, extra, msg) {
     toast("Marcado como pendiente", () => toggleDone(id));
     return;
   }
-  const after = tasks.get(id);
-  toast(msg || "¡Hecho!", () => {
-    if (after?.siguiente) { const nx = tasks.get(after.siguiente); if (nx && !nx.hecho) removeTask(after.siguiente); }
-    patch(id, { hecho: false, hechaEn: null, dia: before.dia ?? null, nota: before.nota ?? "", siguiente: before.siguiente ?? null });
-  });
+  toast(msg || "¡Hecho!", () => undoComplete(id, before));
   maybeCelebrate();
+}
+
+// Regresa una tarea marcada a como estaba (y quita la siguiente si se repetía).
+function undoComplete(id, before) {
+  const after = tasks.get(id);
+  if (after?.siguiente) { const nx = tasks.get(after.siguiente); if (nx && !nx.hecho) removeTask(after.siguiente); }
+  patch(id, { hecho: false, hechaEn: null, dia: before.dia ?? null, nota: before.nota ?? "", siguiente: before.siguiente ?? null });
 }
 
 function removeUndoable(id) {
@@ -1572,6 +1579,14 @@ $("aviso-items").addEventListener("click", (e) => {
   if (!renderAvisoItems()) dlgAviso.close();
 });
 $("aviso-later").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
+// Día pesado: los hábitos que faltan cuentan como descanso (no rompen la racha) y no hay festejo ni más avisos hoy.
+$("aviso-tired").addEventListener("click", () => {
+  const items = pendingHabits(true).filter((t) => avisoIds.includes(t.id));
+  const befores = items.map((t) => [t.id, { ...tasks.get(t.id) }]);
+  items.forEach((t) => toggleDone(t.id, { nota: NOTA_CANSADA }));
+  dlgAviso.close();
+  toast("Escuchar a tu cuerpo también cuenta 🫶 Mañana seguimos", () => befores.forEach(([id, before]) => undoComplete(id, before)));
+});
 dlgAviso.addEventListener("cancel", () => snoozeAviso(30));
 
 // ---------- tus 3 de hoy ----------
@@ -1627,14 +1642,14 @@ $("plan-skip").addEventListener("click", () => { markPlanSeen(); $("plan").close
 $("plan").addEventListener("cancel", markPlanSeen);
 
 // ---------- revisión de la semana ----------
-// De sábado a lunes sale el banner; son 4 pasos: lo que lograste, vaciar Recientes, lo atascado y la próxima semana.
+// Sábado y domingo (el cierre de tu semana) sale el banner; son 4 pasos: lo que lograste, vaciar Recientes, lo atascado y la próxima semana.
 const REVIEW_KEY = "mi-semana-revision";
 const REVIEW_STEPS = 4;
 const AREA_COLOR = { trabajo: "var(--trabajo)", uni: "var(--uni)", casa: "var(--casa)", none: "var(--none)" };
 // La semana a planear: desde el sábado ya es la siguiente.
 const reviewTarget = (today) => (weekday(today) >= 5 ? addDays(mondayOf(today), 7) : mondayOf(today));
 function reviewDue(today) {
-  if (![5, 6, 0].includes(weekday(today))) return false;
+  if (![5, 6].includes(weekday(today))) return false;
   let done = null;
   try { done = localStorage.getItem(REVIEW_KEY); } catch (e) {}
   return done !== reviewTarget(today);
@@ -1666,7 +1681,7 @@ function renderReview() {
         `<div class="stat" style="--hc:${AREA_COLOR[g.key]}"><img src="${g.icon}" alt="">${g.label}<span class="bar"><span style="width:${Math.round((n / max) * 100)}%"></span></span><b>${n}</b></div>`).join("") +
       '<div class="review-sub">Hábitos</div>' +
       HABITOS.map((h) => {
-        const n = list.filter((t) => habitOf(t) === h && inWeek(t) && t.nota !== h.skip.nota).length;
+        const n = list.filter((t) => habitOf(t) === h && inWeek(t) && !isRestNota(h, t.nota)).length;
         const { racha } = habitData(h, list, today);
         return `<div class="stat hab"><img src="${h.icon}" alt="">${h.nombre}<span class="soft">· racha ${racha ? h.racha(racha) : "—"}</span><b>${n} esta semana</b></div>`;
       }).join("");
