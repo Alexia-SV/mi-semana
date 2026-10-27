@@ -283,6 +283,49 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 .aviso-item .row .primary{padding:8px 14px}
 .aviso-item .row a.mini{text-decoration:none;color:var(--ink)}
 
+/* Tus 3 de hoy */
+.plan-link{justify-self:start;margin-top:6px;padding-left:0;color:var(--trabajo)}
+.foco{display:grid;gap:8px;padding:10px;margin:-2px -4px 4px;border-radius:14px;background:var(--surface);border:2px solid var(--hl)}
+.sec-hoy .foco .card{background:var(--bg)}
+.plan-list{display:grid;gap:6px;text-align:left;max-height:46vh;overflow:auto;padding:2px}
+.plan-opt{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;font-weight:700;text-align:left;width:100%}
+.plan-opt img{width:20px;height:20px;flex:none}
+.plan-opt .star{flex:none;font-size:16px;width:20px;text-align:center}
+.plan-opt .what{min-width:0;overflow-wrap:anywhere}
+.plan-opt[aria-pressed="true"]{border-color:var(--hl);box-shadow:inset 0 0 0 1.5px var(--hl);background:var(--surface)}
+.plan-opt:disabled{opacity:.45;cursor:default}
+
+/* Revisión de la semana */
+.review-banner{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1.5px dashed var(--accent)}
+.review-banner img{width:28px;height:28px;flex:none}
+.review-banner div{display:grid;min-width:0;flex:1}
+.review-banner strong{font-size:14.5px}
+.review-banner span{font-size:12.5px;color:var(--muted);font-weight:600}
+.review-banner .primary{padding:8px 14px}
+#review{width:min(540px,calc(100vw - 32px))}
+.review-box{display:grid;gap:12px;padding:20px}
+.review-top{display:flex;align-items:center;gap:10px}
+.steps{margin-left:auto;display:flex;gap:5px}
+.steps i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.steps i.on{background:var(--accent)}
+.review-box h3{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-weight:650;font-size:24px;margin:0;line-height:1.15}
+.review-intro{margin:0;color:var(--muted);font-weight:600}
+.review-body{display:grid;gap:8px;max-height:52vh;overflow:auto;padding:2px}
+.review-foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.stat{display:grid;grid-template-columns:auto 76px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.stat.hab{grid-template-columns:auto auto minmax(0,1fr) auto}
+.stat img{width:20px;height:20px}
+.stat .bar{height:8px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.stat .bar span{display:block;height:100%;border-radius:99px;background:var(--hc)}
+.stat b{font-variant-numeric:tabular-nums}
+.big-num{display:flex;align-items:baseline;gap:8px;font-family:var(--f-display);font-weight:650}
+.big-num b{font-size:44px;line-height:1}
+.big-num span{font-size:17px;color:var(--muted)}
+.weekmini{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.wm{background:var(--sunk);border-radius:10px;padding:6px 0;text-align:center;font-size:12px;font-weight:800;color:var(--muted)}
+.wm b{display:block;font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
+.review-sub{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+
 /* Refuerzo positivo: ventana sin bloquear la página y hojitas cayendo encima */
 #festejo{position:fixed;inset:auto;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;z-index:25;width:min(360px,calc(100vw - 32px));border:2px solid var(--hl)}
 #festejo .aviso-box img.cat{width:76px;height:76px}
@@ -417,6 +460,12 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
         <span class="hand" id="hoy-phrase"></span>
         <div class="hoy-sub"><span id="hoy-count"></span><span id="hoy-carry"></span></div>
         <div class="progress" aria-hidden="true"><span id="hoy-bar" style="width:0"></span></div>
+        <button type="button" class="textbtn plan-link" id="plan-link" data-act="plan" hidden>⭐ Elegir mis 3 de hoy</button>
+      </div>
+      <div class="review-banner" id="review-banner" hidden>
+        <img src="img/tulip_flat.svg" alt="">
+        <div><strong>Revisión de la semana</strong><span>5 minutitos para empezar la semana ligera</span></div>
+        <button type="button" class="primary" data-act="review">Empezar</button>
       </div>
       <div class="soon" id="hoy-soon" hidden></div>
       <div class="stack" id="hoy-list"></div>
@@ -525,6 +574,38 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
     <div class="aviso-items" id="aviso-items"></div>
     <div class="aviso-actions">
       <button type="button" class="textbtn" id="aviso-later">Recuérdame en 30 min</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="plan" aria-labelledby="plan-title">
+  <div class="aviso-box">
+    <img class="cat" src="img/cat_face_flat.svg" alt="">
+    <span class="eyebrow"><img src="img/glowing_star_flat.svg" alt="">Plan del día</span>
+    <h3 id="plan-title">Elige tus 3 de hoy</h3>
+    <p>Si solo haces estas, el día ya cuenta. Lo demás es extra.</p>
+    <div class="plan-list" id="plan-list"></div>
+    <div class="aviso-actions">
+      <button type="button" class="primary" id="plan-ok">Listo</button>
+      <button type="button" class="textbtn" id="plan-skip">Hoy no</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="review" aria-labelledby="review-title">
+  <div class="review-box">
+    <div class="review-top">
+      <span class="eyebrow"><img src="img/tulip_flat.svg" alt="">Revisión de la semana</span>
+      <span class="steps" id="review-steps"></span>
+    </div>
+    <h3 id="review-title"></h3>
+    <p class="review-intro" id="review-intro"></p>
+    <div class="review-body" id="review-body"></div>
+    <div class="review-foot">
+      <button type="button" class="textbtn" id="review-close">Terminar después</button>
+      <span class="spacer"></span>
+      <button type="button" class="ghost" id="review-back">Atrás</button>
+      <button type="button" class="primary" id="review-next">Siguiente</button>
     </div>
   </div>
 </dialog>
@@ -646,6 +727,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const fromRow = (r) => ({
   titulo: r.titulo, area: r.area, sub: r.sub, dia: r.dia, hecho: r.hecho, hechaEn: r.hecha_en,
   obligatorio: r.obligatorio, nota: r.nota, repite: r.repite || [], siguiente: r.siguiente, creada: r.creada,
+  foco: r.foco ?? null, // día en que la elegiste entre "tus 3 de hoy"
 });
 function toRow(data) {
   const row = { ...data };
@@ -662,6 +744,7 @@ async function loadAll() {
   render();
   ensureHabitTasks();
   checkAviso();
+  maybeAskPlan();
 }
 
 // La primera vez crea el pendiente de cada hábito (se puede editar o borrar como cualquier otro).
@@ -709,8 +792,10 @@ function removeTask(id) {
   render();
   return write(id, () => run(sb.from("tareas").delete().eq("id", id)));
 }
-function handleWriteError() {
-  toast("No se guardó el cambio. Revisa tu conexión.");
+function handleWriteError(e) {
+  // Sin la columna "foco" en Supabase, "tus 3 de hoy" no se pueden guardar.
+  if (String(e?.message || "").includes("foco")) setStatus("Falta un paso en Supabase: corre el SQL de «tus 3 de hoy» (columna foco).", true);
+  else toast("No se guardó el cambio. Revisa tu conexión.");
   scheduleRefetch();
 }
 
@@ -795,7 +880,7 @@ function card(t, mode) {
     const label = t.area && AREAS[t.area] ? esc(t.sub || AREAS[t.area].label) : "Sin área";
     bits.push(`<span class="where ${t.area || ""}"><img src="${areaIcon(t)}" alt="">${label}</span>`);
     if (t.obligatorio) bits.push('<span class="flag" title="Obligatorio">⚑</span>');
-    if (t._carry) bits.push(`<span class="carry">desde ${DIAS[weekday(t.dia)].toLowerCase()} ${parseKey(t.dia).getDate()}</span>`);
+    if (t._carry) bits.push(`<span class="carry">${carryLabel(t, false)}</span>`);
     if (Array.isArray(t.repite) && t.repite.length) bits.push(`<span class="soft" title="Se repite: ${repLabel(t.repite)}">↻</span>`);
     const nudge = t.hecho ? "" : `<span class="nudge">
       <button data-act="prev" aria-label="Pasar al día anterior"${prevBlocked ? " disabled" : ""}>‹</button>
@@ -814,6 +899,13 @@ function card(t, mode) {
   } else if (mode === "inbox") {
     actions = `<div class="actions">${Object.keys(AREAS).map((a) =>
       `<button class="mini pick pick-${a}" data-act="area" data-area="${a}"><img src="${AREAS[a].icon}" alt="">${AREAS[a].label}</button>`).join("")}</div>`;
+  } else if (mode === "stuck") {
+    const target = reviewTarget(today);
+    actions = `<div class="actions">
+      <button class="mini" data-act="setday" data-day="${target}">${target === today ? "Dejar para hoy" : "Pasar al lunes"}</button>
+      <button class="mini" data-act="edit">Elegir día…</button>
+      <button class="mini" data-act="drop">Soltar</button>
+    </div>`;
   } else if (mode === "backlog") {
     actions = `<div class="actions">
       <button class="mini" data-act="settoday">Hoy</button>
@@ -824,7 +916,7 @@ function card(t, mode) {
   const extras = [];
   if (mode !== "inbox") extras.push(badge(t));
   if (t.obligatorio) extras.push('<span class="flag">⚑ Obligatorio</span>');
-  if (t._carry && mode === "hoy") extras.push(`<span class="carry">viene del ${DIAS_L[weekday(t.dia)]} ${parseKey(t.dia).getDate()}</span>`);
+  if (t._carry && (mode === "hoy" || mode === "stuck")) extras.push(`<span class="carry">${carryLabel(t, true)}</span>`);
   if (Array.isArray(t.repite) && t.repite.length) extras.push(`<span class="soft">↻ ${repLabel(t.repite)}</span>`);
   if (t.nota) extras.push(`<span class="soft" title="${esc(t.nota)}">· nota</span>`);
   return `<article class="card${t.hecho ? " done" : ""}" data-id="${esc(t.id)}"${drag}>
@@ -882,6 +974,14 @@ function renderHabitos(list, today) {
   }).join("");
 }
 
+const daysBetween = (a, b) => Math.round((parseKey(b) - parseKey(a)) / 864e5);
+// Lo que se arrastra 3 días o más se marca como atascado.
+function carryLabel(t, long) {
+  const n = daysBetween(t.dia, todayKey());
+  if (n >= 3) return `lleva ${n} días 🐌`;
+  return long ? `viene del ${DIAS_L[weekday(t.dia)]} ${parseKey(t.dia).getDate()}` : `desde ${DIAS[weekday(t.dia)].toLowerCase()} ${parseKey(t.dia).getDate()}`;
+}
+
 // "mañana", "en 3 días · jue"
 function cuando(dk) {
   const n = Math.round((parseKey(dk) - parseKey(todayKey())) / 864e5);
@@ -926,15 +1026,25 @@ function render() {
         `<button class="soon-row" data-act="edit" data-id="${esc(t.id)}"><span class="soon-when">${cuando(t.dia)}</span><span class="soon-what">${esc(t.titulo)}</span></button>`).join("") +
       (soon.length > 4 ? `<span class="soft">y ${soon.length - 4} más en la semana</span>` : "")
     : "";
+  // Tus 3 de hoy van primero; el resto, agrupado por área.
+  const foco = hoy.filter((t) => t.foco === today);
+  const resto = hoy.filter((t) => t.foco !== today);
+  const elegibles = planCandidates(list, today).length;
+  $("plan-link").hidden = !loaded || elegibles < 2;
+  $("plan-link").textContent = foco.length ? "⭐ Cambiar mis 3" : "⭐ Elegir mis 3 de hoy";
+  const head = (icon, label, items) =>
+    `<div class="group-head"><img src="${icon}" alt="">${label}<span>${items.filter((t) => t.hecho).length}/${items.length}</span></div>`;
   $("hoy-list").innerHTML = !loaded ? emptyBox("img/teacup_without_handle_flat.svg", "Cargando…")
-    : hoy.length ? GRUPOS.map((g) => {
-        const items = hoy.filter((t) => groupKey(t) === g.key);
-        if (!items.length) return "";
-        const hechasG = items.filter((t) => t.hecho).length;
-        return `<div class="group-head"><img src="${g.icon}" alt="">${g.label}<span>${hechasG}/${items.length}</span></div>` +
-          items.map((t) => card(t, "hoy")).join("");
+    : hoy.length ? (foco.length ? `<div class="foco">${head("img/glowing_star_flat.svg", "Tus 3 de hoy", foco)}${foco.map((t) => card(t, "hoy")).join("")}</div>` : "") +
+      GRUPOS.map((g) => {
+        const items = resto.filter((t) => groupKey(t) === g.key);
+        return items.length ? head(g.icon, g.label, items) + items.map((t) => card(t, "hoy")).join("") : "";
       }).join("")
     : emptyBox("img/black_cat_flat.svg", "Nada para hoy. Toca “Hoy” en Sin día o el + de un día.");
+
+  // Revisión semanal: el banner sale de sábado a lunes hasta que la hagas
+  $("review-banner").hidden = !loaded || !reviewDue(today);
+  if ($("review").open) renderReview();
 
   // Recientes
   const rec = list.filter((t) => !t.area && !t.hecho).sort(sortItems);
@@ -1089,6 +1199,10 @@ document.addEventListener("click", (e) => {
     case "settomorrow": setDay(id, addDays(todayKey(), 1)); break;
     case "edit": openEditor(id); break;
     case "addday": openEditor(null, el.dataset.day); break;
+    case "setday": setDay(id, el.dataset.day); break;
+    case "drop": removeUndoable(id); break;
+    case "plan": openPlan(); break;
+    case "review": openReview(); break;
   }
 });
 
@@ -1326,6 +1440,138 @@ $("aviso-items").addEventListener("click", (e) => {
 $("aviso-later").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
 dlgAviso.addEventListener("cancel", () => snoozeAviso(30));
 
+// ---------- tus 3 de hoy ----------
+// La primera vez que abres la app en el día, si tienes 4 o más pendientes, te pide elegir 3.
+const PLAN_KEY = "mi-semana-plan";
+const anyDialogOpen = () => ["editor", "aviso", "plan", "review"].some((d) => $(d).open);
+const planCandidates = (list, today) => list.filter((t) => t._day === today && !t.hecho && !habitOf(t)).sort(sortGrouped);
+let planSel = new Set();
+function maybeAskPlan() {
+  if (!loaded || anyDialogOpen()) return;
+  const today = todayKey();
+  const list = decorate();
+  let seen = null;
+  try { seen = localStorage.getItem(PLAN_KEY); } catch (e) {}
+  if (seen === today || list.some((t) => t.foco === today) || planCandidates(list, today).length < 4) return;
+  openPlan();
+}
+function openPlan() {
+  const today = todayKey();
+  const cands = planCandidates(decorate(), today);
+  if (!cands.length) { toast("No hay pendientes para hoy"); return; }
+  planSel = new Set(cands.filter((t) => t.foco === today).map((t) => t.id));
+  renderPlan();
+  $("plan").showModal();
+}
+function renderPlan() {
+  $("plan-list").innerHTML = planCandidates(decorate(), todayKey()).map((t) => {
+    const on = planSel.has(t.id);
+    return `<button type="button" class="plan-opt" data-plan="${esc(t.id)}" aria-pressed="${on}"${!on && planSel.size >= 3 ? " disabled" : ""}>
+      <span class="star">${on ? "⭐" : "☆"}</span><img src="${areaIcon(t)}" alt=""><span class="what">${esc(t.titulo)}</span></button>`;
+  }).join("");
+  $("plan-ok").textContent = planSel.size ? `Listo (${planSel.size}/3)` : "Listo";
+}
+const markPlanSeen = () => { try { localStorage.setItem(PLAN_KEY, todayKey()); } catch (e) {} };
+$("plan-list").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-plan]"); if (!b) return;
+  const id = b.dataset.plan;
+  if (planSel.has(id)) planSel.delete(id);
+  else if (planSel.size < 3) planSel.add(id);
+  renderPlan();
+});
+$("plan-ok").addEventListener("click", () => {
+  const today = todayKey();
+  for (const t of planCandidates(decorate(), today)) {
+    const want = planSel.has(t.id) ? today : null;
+    if ((t.foco === today ? today : null) !== want) patch(t.id, { foco: want });
+  }
+  markPlanSeen();
+  $("plan").close();
+  if (planSel.size) toast(planSel.size === 1 ? "Tu prioridad de hoy está arriba ⭐" : `Tus ${planSel.size} de hoy están arriba ⭐`);
+});
+$("plan-skip").addEventListener("click", () => { markPlanSeen(); $("plan").close(); });
+$("plan").addEventListener("cancel", markPlanSeen);
+
+// ---------- revisión de la semana ----------
+// De sábado a lunes sale el banner; son 4 pasos: lo que lograste, vaciar Recientes, lo atascado y la próxima semana.
+const REVIEW_KEY = "mi-semana-revision";
+const REVIEW_STEPS = 4;
+const AREA_COLOR = { trabajo: "var(--trabajo)", uni: "var(--uni)", casa: "var(--casa)", none: "var(--none)" };
+// La semana a planear: desde el sábado ya es la siguiente.
+const reviewTarget = (today) => (weekday(today) >= 5 ? addDays(mondayOf(today), 7) : mondayOf(today));
+function reviewDue(today) {
+  if (![5, 6, 0].includes(weekday(today))) return false;
+  let done = null;
+  try { done = localStorage.getItem(REVIEW_KEY); } catch (e) {}
+  return done !== reviewTarget(today);
+}
+let reviewStep = 0;
+function openReview() {
+  reviewStep = 0;
+  renderReview();
+  $("review").showModal();
+}
+function renderReview() {
+  const today = todayKey();
+  const target = reviewTarget(today);
+  const prev = addDays(target, -7);
+  const list = decorate();
+  $("review-steps").innerHTML = Array.from({ length: REVIEW_STEPS }, (_, i) => `<i class="${i <= reviewStep ? "on" : ""}"></i>`).join("");
+  $("review-back").hidden = reviewStep === 0;
+  $("review-next").textContent = reviewStep === REVIEW_STEPS - 1 ? "Terminar ✨" : "Siguiente";
+  let title, intro, body;
+  if (reviewStep === 0) {
+    const inWeek = (t) => t.hecho && t.dia >= prev && t.dia <= addDays(prev, 6);
+    const done = list.filter((t) => inWeek(t) && !habitOf(t));
+    title = done.length >= 15 ? "¡Semanón! 🎉" : done.length >= 8 ? "Buena semana 🌿" : "Cada pasito contó 🐾";
+    intro = `Lo que lograste del ${shortDate(prev)} al ${shortDate(addDays(prev, 6))}.`;
+    const porArea = GRUPOS.filter((g) => g.key !== "noche").map((g) => [g, done.filter((t) => groupKey(t) === g.key).length]);
+    const max = Math.max(1, ...porArea.map(([, n]) => n));
+    body = `<div class="big-num"><b>${done.length}</b><span>pendientes hechos</span></div>` +
+      porArea.filter(([, n]) => n).map(([g, n]) =>
+        `<div class="stat" style="--hc:${AREA_COLOR[g.key]}"><img src="${g.icon}" alt="">${g.label}<span class="bar"><span style="width:${Math.round((n / max) * 100)}%"></span></span><b>${n}</b></div>`).join("") +
+      '<div class="review-sub">Hábitos</div>' +
+      HABITOS.map((h) => {
+        const n = list.filter((t) => habitOf(t) === h && inWeek(t) && t.nota !== h.skip.nota).length;
+        const { racha } = habitData(h, list, today);
+        return `<div class="stat hab"><img src="${h.icon}" alt="">${h.nombre}<span class="soft">· racha ${racha ? h.racha(racha) : "—"}</span><b>${n} esta semana</b></div>`;
+      }).join("");
+  } else if (reviewStep === 1) {
+    const rec = list.filter((t) => !t.area && !t.hecho).sort(sortItems);
+    title = "Vacía Recientes";
+    intro = "Dale a cada cosa su lugar: Casa, Uni o Trabajo.";
+    body = rec.length ? rec.map((t) => card(t, "inbox")).join("") : emptyBox("img/sparkles_flat.svg", "Recientes está vacío. ✨");
+  } else if (reviewStep === 2) {
+    const stuck = list.filter((t) => !t.hecho && !habitOf(t) && t.dia && daysBetween(t.dia, today) >= 3).sort((a, b) => a.dia.localeCompare(b.dia));
+    title = "Lo que se quedó atascado";
+    intro = "Llevan 3 días o más pasándose. Está bien soltar lo que ya no importa.";
+    body = stuck.length ? stuck.map((t) => card(t, "stuck")).join("") : emptyBox("img/black_cat_flat.svg", "Nada atascado. ¡Bien!");
+  } else {
+    title = "Tu próxima semana";
+    intro = `Del ${shortDate(target)} al ${shortDate(addDays(target, 6))}.`;
+    const counts = DIAS.map((d, i) => `<div class="wm">${d}<b>${list.filter((t) => t.dia === addDays(target, i) && !t.hecho && !habitOf(t)).length}</b></div>`).join("");
+    const oblig = list.filter((t) => t.obligatorio && !t.hecho && t.dia && t.dia >= target && t.dia <= addDays(target, 6)).sort((a, b) => a.dia.localeCompare(b.dia));
+    const sinDia = list.filter((t) => t.area && !t.dia && !t.hecho).sort(sortGrouped);
+    body = `<div class="weekmini">${counts}</div>` +
+      (oblig.length ? '<div class="review-sub">⚑ Obligatorios</div>' + oblig.map((t) =>
+        `<button class="soon-row" data-act="edit" data-id="${esc(t.id)}"><span class="soon-when">${DIAS_L[weekday(t.dia)]} ${parseKey(t.dia).getDate()}</span><span class="soon-what">${esc(t.titulo)}</span></button>`).join("") : "") +
+      (sinDia.length ? '<div class="review-sub">¿Le pones día a algo de Sin día?</div>' + sinDia.map((t) => card(t, "backlog")).join("") : "");
+  }
+  $("review-title").textContent = title;
+  $("review-intro").textContent = intro;
+  $("review-body").innerHTML = body;
+}
+$("review-next").addEventListener("click", () => {
+  if (reviewStep < REVIEW_STEPS - 1) { reviewStep++; renderReview(); $("review-body").scrollTop = 0; return; }
+  try { localStorage.setItem(REVIEW_KEY, reviewTarget(todayKey())); } catch (e) {}
+  $("review").close();
+  render();
+  toast("Semana lista ✨ A darle con calma");
+  leafRain();
+});
+$("review-back").addEventListener("click", () => { if (reviewStep > 0) { reviewStep--; renderReview(); } });
+$("review-close").addEventListener("click", () => $("review").close());
+
 // ---------- refuerzo positivo ----------
 // Cada 3 tareas hechas en el día (3, 6, 9…) y al terminar todo lo de Hoy; cada uno sale una sola vez al día.
 const FESTEJO_KEY = "mi-semana-festejos";
@@ -1334,6 +1580,7 @@ const FESTEJOS = {
   6: ["¡6 hechas!", "Ya llevas el día ganado. Un té y sigues.", "img/teacup_without_handle_flat.svg"],
   9: ["¡9! Estás imparable", "Respira, estírate y celébralo un poquito.", "img/glowing_star_flat.svg"],
   all: ["Día completo ✨", "Terminaste todo lo de hoy. Ahora sí, a descansar con Monis.", "img/black_cat_flat.svg"],
+  foco: ["¡Tus 3 de hoy, listas! 🌟", "Lo importante ya está. Todo lo demás es extra.", "img/glowing_star_flat.svg"],
 };
 const dlgFestejo = $("festejo");
 let festejoTimer;
@@ -1346,7 +1593,9 @@ function maybeCelebrate() {
   let st = { day: today, hits: [] };
   try { const s = JSON.parse(localStorage.getItem(FESTEJO_KEY)); if (s && s.day === today && Array.isArray(s.hits)) st = s; } catch (e) {}
   let key = null;
+  const foco = hoy.filter((t) => t.foco === today);
   if (allDone && !st.hits.includes("all")) key = "all";
+  else if (foco.length && foco.every((t) => t.hecho) && !st.hits.includes("foco")) key = "foco";
   else if (done >= 3 && done % 3 === 0 && !st.hits.includes(done)) key = done;
   if (key === null) return;
   st.hits.push(key);
@@ -1443,6 +1692,8 @@ if (DEMO) {
     ["Desmaquillarme", "casa", "Cuidado", t0, false, [0, 1, 2, 3, 4, 6]],
     ["Limpiar la arena de Monis", "casa", "Pendientes", t0, false, [0, 1, 2, 3, 4, 5, 6]],
     ["Revisar el ticket de emails", "trabajo", "CoCloset", t0, true, []],
+    ["Revisar inbox de Notion", "trabajo", "Simcha", t0, false, []],
+    ["Escanear documentos de titulación", "uni", "Titulación", addDays(t0, -5), false, []],
     ["Entregar documentación del videojuego", "uni", "Proyectos", addDays(t0, 1), false, [], true],
     ["Test de formularios", "trabajo", "Simcha", addDays(t0, 1), false, []],
     ["Presentar el videojuego", "uni", "Proyectos", addDays(t0, 2), false, [], true],
@@ -1461,6 +1712,8 @@ if (DEMO) {
   $("login").hidden = true; $("app").hidden = false;
   render();
   if (location.hash === "#demo-aviso") checkAviso(true); // muestra el aviso sin esperar a las 11 p. m.
+  if (location.hash === "#demo-plan") openPlan();
+  if (location.hash === "#demo-revision") openReview();
 }
 </script>
 </body>
