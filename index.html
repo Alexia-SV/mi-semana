@@ -293,6 +293,7 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 .aviso-item .row{grid-column:1/-1;gap:6px;margin-top:6px}
 .aviso-item .row .primary{padding:8px 14px}
 .aviso-item .row a.mini{text-decoration:none;color:var(--ink)}
+.aviso-item .row .tired{flex-basis:100%;padding:7px 10px;background:var(--surface)}
 
 /* Tus 3 de hoy */
 .plan-link{justify-self:start;margin-top:6px;padding-left:0;color:var(--trabajo)}
@@ -613,7 +614,6 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
     <p id="aviso-text"></p>
     <div class="aviso-items" id="aviso-items"></div>
     <div class="aviso-actions">
-      <button type="button" class="ghost" id="aviso-tired">🫶 Me siento cansada, fue un día pesado</button>
       <button type="button" class="textbtn" id="aviso-later">Recuérdame en 30 min</button>
     </div>
   </div>
@@ -689,6 +689,7 @@ const HABITOS = [
     racha: (n) => `${n} ${n === 1 ? "día" : "días"}`, rachaIcon: "img/fire_flat.svg",
     skip: { label: "Hoy descanso", nota: "Hoy fue descanso 🌙", msg: "Descansar también cuenta 🌙" },
     link: { label: "Band&Bloom", href: BAND_BLOOM_URL },
+    cansada: true, // en el aviso de las 11 p. m. ofrece "Me siento cansada, fue un día pesado"
   },
   {
     key: "desmaquillar", sub: "Cuidado", nombre: "Desmaquillarme", titulo: "Desmaquillarme",
@@ -977,7 +978,7 @@ function repLabel(rep) {
   if (rep.length === 7) return "diario";
   return [...rep].sort((a, b) => a - b).map((i) => DIAS[i]).join(" ");
 }
-// "Día pesado" desde la Rutina de noche: cuenta como descanso, igual que la salida de cada hábito.
+// "Día pesado" del ejercicio en la Rutina de noche: cuenta como descanso, igual que la salida de cada hábito.
 const NOTA_CANSADA = "Día pesado, descansé 🫶";
 const isRestNota = (h, nota) => nota === h.skip.nota || nota === NOTA_CANSADA;
 const habitOf = (t) => (t.area === "casa" ? HABITOS.find((h) => h.sub === t.sub) : null) || null;
@@ -1549,7 +1550,8 @@ function renderAvisoItems() {
     return `<div class="aviso-item" data-id="${esc(t.id)}">
       <img src="${h.icon}" alt=""><strong>${esc(t.titulo)}</strong><span class="tip">${h.tip}</span>
       <div class="row"><button type="button" class="primary" data-aviso="done">Hecho</button>
-        <button type="button" class="mini" data-aviso="skip">${h.skip.label}</button>${link}</div>
+        <button type="button" class="mini" data-aviso="skip">${h.skip.label}</button>${link}
+        ${h.cansada ? '<button type="button" class="mini tired" data-aviso="tired">🫶 Me siento cansada, fue un día pesado</button>' : ""}</div>
     </div>`;
   }).join("");
   return items.length;
@@ -1576,17 +1578,15 @@ $("aviso-items").addEventListener("click", (e) => {
   if (b.dataset.aviso === "link") { snoozeAviso(30); dlgAviso.close(); return; } // vuelve a preguntar al rato
   if (b.dataset.aviso === "done") completeUndoable(id);
   if (b.dataset.aviso === "skip" && h) completeUndoable(id, { nota: h.skip.nota }, h.skip.msg);
+  // Día pesado (solo ejercicio): cuenta como descanso, no rompe la racha y no hay festejo.
+  if (b.dataset.aviso === "tired") {
+    const before = { ...tasks.get(id) };
+    toggleDone(id, { nota: NOTA_CANSADA });
+    toast("Escuchar a tu cuerpo también cuenta 🫶 Mañana seguimos", () => undoComplete(id, before));
+  }
   if (!renderAvisoItems()) dlgAviso.close();
 });
 $("aviso-later").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
-// Día pesado: los hábitos que faltan cuentan como descanso (no rompen la racha) y no hay festejo ni más avisos hoy.
-$("aviso-tired").addEventListener("click", () => {
-  const items = pendingHabits(true).filter((t) => avisoIds.includes(t.id));
-  const befores = items.map((t) => [t.id, { ...tasks.get(t.id) }]);
-  items.forEach((t) => toggleDone(t.id, { nota: NOTA_CANSADA }));
-  dlgAviso.close();
-  toast("Escuchar a tu cuerpo también cuenta 🫶 Mañana seguimos", () => befores.forEach(([id, before]) => undoComplete(id, before)));
-});
 dlgAviso.addEventListener("cancel", () => snoozeAviso(30));
 
 // ---------- tus 3 de hoy ----------
