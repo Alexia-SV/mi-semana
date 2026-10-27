@@ -1,0 +1,15 @@
+{
+  "name": "Mi Semana",
+  "short_name": "Mi Semana",
+  "description": "Pendientes de Casa, Uni y Trabajo organizados por semana.",
+  "lang": "es-MX",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f4f0",
+  "theme_color": "#f3f4f0",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

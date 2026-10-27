@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mi Semana</title>
+<meta name="description" content="Pendientes de Casa, Uni y Trabajo organizados por semana.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Semana">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f4f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131614" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: captura rápida arriba; en pantallas anchas una columna lateral (Hoy, Recientes, Sin día) junto a la semana Lun–Dom; en celular todo apilado. */
+:root{
+  --bg:#f3f4f0; --surface:#ffffff; --sunk:#e9ebe5; --ink:#1b201d; --muted:#646c67; --line:#d9ddd6;
+  --hl:#f2d94c; --hl-ink:#1b201d; --focus:#3450bd; --danger:#b3261e;
+  --casa:#2b7350; --casa-bg:#e0efe6; --uni:#3450bd; --uni-bg:#e5e8f9; --trabajo:#a8561a; --trabajo-bg:#f8e7d6; --none:#646c67; --none-bg:#e6e8e3;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  --r:10px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#131614; --surface:#1b1f1d; --sunk:#232825; --ink:#e7ebe8; --muted:#99a29d; --line:#2e3531;
+  --hl:#d8c03c; --hl-ink:#131614; --focus:#93a6ff; --danger:#ff8a80;
+  --casa:#74d0a0; --casa-bg:#1c3227; --uni:#9db0ff; --uni-bg:#222a4a; --trabajo:#f2a866; --trabajo-bg:#3a2919; --none:#a3aba6; --none-bg:#2a302c;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:max(20px,calc(env(safe-area-inset-top,0px) + 8px));padding-bottom:max(64px,calc(env(safe-area-inset-bottom,0px) + 32px))}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1440px;margin:0 auto;display:grid;gap:22px}
+
+/* Encabezado + captura */
+.top{display:grid;gap:14px}
+.date{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.date h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,36px);letter-spacing:-.02em;margin:0;line-height:1.05;text-wrap:balance}
+.date .wk{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.date .out{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:13px;padding:4px 6px;border-radius:6px}
+.date .out:hover{background:var(--sunk);color:var(--ink)}
+.capture{display:flex;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 1px 0 var(--line)}
+.capture input{flex:1;min-width:0;border:0;background:transparent;padding:10px 10px;font-size:16px;outline:none}
+.capture button{border:0;background:var(--ink);color:var(--bg);border-radius:10px;padding:0 16px;font-weight:600;white-space:nowrap}
+.capture button:disabled{opacity:.4;cursor:default}
+.status{font-size:13px;color:var(--muted);margin:0}
+.status.warn{color:var(--danger)}
+
+/* Login */
+.login{max-width:420px;margin:12vh auto 0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:grid;gap:14px}
+.login h1{font-family:var(--f-display);font-weight:700;font-size:30px;letter-spacing:-.02em;margin:0}
+.login p{margin:0;color:var(--muted)}
+.login form{display:grid;gap:10px}
+.login input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:11px 12px;font-size:16px}
+.login input#login-code{letter-spacing:.3em;font-variant-numeric:tabular-nums;text-align:center;font-size:20px}
+.login .msg{font-size:13px;color:var(--muted);margin:0}
+.login .msg.warn{color:var(--danger)}
+.linkish{border:0;background:transparent;color:var(--muted);font-size:13px;text-decoration:underline;padding:0;justify-self:start}
+
+/* Rejilla principal */
+.layout{display:grid;gap:22px;grid-template-areas:"hoy" "rec" "week" "sin"}
+@media (min-width:1280px){.layout{grid-template-columns:320px minmax(0,1fr);grid-template-areas:"hoy week" "rec week" "sin week";grid-template-rows:auto auto 1fr;align-items:start}}
+.sec-hoy{grid-area:hoy}.sec-rec{grid-area:rec}.sec-week{grid-area:week}.sec-sin{grid-area:sin}
+section{min-width:0}
+.sec-head{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+.sec-head h2{font-family:var(--f-display);font-weight:700;font-size:19px;margin:0;letter-spacing:-.01em}
+.count{font-size:12px;font-weight:600;background:var(--sunk);color:var(--muted);border-radius:99px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.count.many{background:var(--hl);color:var(--hl-ink)}
+.hint{font-size:13px;color:var(--muted);margin:0 0 10px}
+.empty{font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r);padding:12px;margin:0}
+.stack{display:grid;gap:8px}
+
+/* Hoy */
+.sec-hoy{background:var(--surface);border:2px solid var(--hl);border-radius:14px;padding:14px}
+.hoy-head{display:grid;gap:2px;margin-bottom:10px}
+.eyebrow{justify-self:start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--hl);color:var(--hl-ink);border-radius:4px;padding:2px 7px}
+.hoy-head h2{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4.5vw,30px);letter-spacing:-.02em;line-height:1.1;margin:4px 0 0;text-wrap:balance}
+.hoy-sub{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sec-hoy .card{background:var(--bg)}
+
+/* Navegación de semana */
+.weeknav{display:flex;align-items:center;gap:6px;margin-left:auto}
+.weeknav .range{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:4px}
+.ghost{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:500}
+.ghost:hover{background:var(--sunk)}
+.icon{width:32px;height:32px;padding:0;display:inline-grid;place-items:center}
+
+/* Semana */
+.week{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.week{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
+@media (min-width:1280px){.week{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}}
+.day{background:var(--sunk);border-radius:12px;padding:8px;display:grid;gap:8px;align-content:start;min-width:0;border:2px solid transparent;transition:border-color .12s}
+@media (min-width:1280px){.day{min-height:320px}}
+.day.past{opacity:.72}
+.day.today{background:var(--surface);border-color:var(--hl)}
+.day.over{border-color:var(--focus);border-style:dashed}
+.day-head{display:flex;align-items:center;gap:6px;padding:2px 2px 0}
+.day-head .dn{font-family:var(--f-display);font-weight:700;font-size:15px}
+.day-head .dd{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.day-head .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--hl);color:var(--hl-ink);border-radius:4px;padding:1px 6px}
+.day-head .add{margin-left:auto;width:26px;height:26px;border-radius:7px;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1}
+.day-head .add:hover{background:var(--line);color:var(--ink)}
+.day-items{display:grid;gap:6px}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 8px 8px 6px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 6px;align-items:start}
+.day.today .card{background:var(--bg)}
+.card[draggable="true"]{cursor:grab}
+.card.dragging{opacity:.4}
+.card.done .title{text-decoration:line-through;color:var(--muted)}
+.card.done{opacity:.7}
+.check{width:22px;height:22px;margin:1px 2px 0;border-radius:6px;border:1.5px solid var(--muted);background:transparent;display:grid;place-items:center;padding:0}
+.check svg{width:14px;height:14px;opacity:0}
+.check:hover svg{opacity:.35}
+.card.done .check{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.card.done .check svg{opacity:1}
+.title{border:0;background:transparent;padding:2px 0 0;text-align:left;font-weight:500;overflow-wrap:anywhere;min-width:0}
+.title:hover{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.meta{grid-column:2;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.badge{font-size:11.5px;font-weight:600;border-radius:5px;padding:2px 6px;white-space:nowrap;background:var(--none-bg);color:var(--none)}
+.badge.casa{background:var(--casa-bg);color:var(--casa)}
+.badge.uni{background:var(--uni-bg);color:var(--uni)}
+.badge.trabajo{background:var(--trabajo-bg);color:var(--trabajo)}
+.flag{font-size:11.5px;font-weight:600;color:var(--danger)}
+.carry{font-size:11.5px;font-weight:600;color:var(--trabajo)}
+.note-dot{font-size:11.5px;color:var(--muted)}
+.actions{grid-column:2;display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.mini{border:1px solid var(--line);background:transparent;border-radius:6px;padding:3px 8px;font-size:12.5px;font-weight:500}
+.mini:hover:not(:disabled){background:var(--sunk)}
+.mini:disabled{opacity:.35;cursor:default}
+.mini.arrow{padding:3px 7px}
+.mini.pick-casa{color:var(--casa);border-color:var(--casa-bg);background:var(--casa-bg)}
+.mini.pick-uni{color:var(--uni);border-color:var(--uni-bg);background:var(--uni-bg)}
+.mini.pick-trabajo{color:var(--trabajo);border-color:var(--trabajo-bg);background:var(--trabajo-bg)}
+.mini.pick-casa:hover,.mini.pick-uni:hover,.mini.pick-trabajo:hover{filter:brightness(.96)}
+
+/* Pestañas Sin día */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 11px;font-size:13px;font-weight:500}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sec-sin .stack.drop.over{outline:2px dashed var(--focus);outline-offset:4px;border-radius:var(--r)}
+
+/* Editor */
+dialog{border:0;border-radius:16px;padding:0;background:var(--surface);color:var(--ink);width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(10,12,11,.45)}
+.ed{display:grid;gap:14px;padding:18px}
+.ed h3{font-family:var(--f-display);font-size:19px;margin:0}
+.field{display:grid;gap:6px}
+.field>label,.field>.lbl{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.ed input[type=text],.ed input[type=date],.ed select,.ed textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;font-size:16px}
+.ed textarea{min-height:64px;resize:vertical}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:14px;cursor:pointer}
+.seg input{accent-color:var(--ink)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px}
+.ed-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.primary{border:0;background:var(--ink);color:var(--bg);border-radius:9px;padding:10px 16px;font-weight:600}
+.primary:disabled{opacity:.5;cursor:default}
+.danger{border:1px solid transparent;background:transparent;color:var(--danger);border-radius:9px;padding:9px 10px;font-weight:500}
+.danger.armed{border-color:var(--danger)}
+.spacer{flex:1}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:14px;z-index:20;max-width:calc(100vw - 32px)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="login" id="login" hidden>
+  <h1>Mi Semana</h1>
+  <p>Escribe tu correo y te mandamos un código para entrar. Solo lo haces una vez en cada dispositivo.</p>
+  <form id="login-email-form">
+    <input id="login-email" type="email" placeholder="tu@correo.com" autocomplete="email" required>
+    <button class="primary" type="submit" id="login-send">Enviarme el código</button>
+  </form>
+  <form id="login-code-form" hidden>
+    <input id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="código" required>
+    <button class="primary" type="submit" id="login-verify">Entrar</button>
+    <button class="linkish" type="button" id="login-back">Usar otro correo</button>
+  </form>
+  <p class="msg" id="login-msg"></p>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header class="top">
+    <div class="date">
+      <h1>Mi semana</h1>
+      <span class="wk" id="today-week"></span>
+      <button class="out" id="logout" type="button">Salir</button>
+    </div>
+    <form class="capture" id="capture" autocomplete="off">
+      <input id="capture-input" type="text" placeholder="Anota algo rápido… (luego lo acomodas)" aria-label="Nuevo pendiente" enterkeyhint="done">
+      <button type="submit" id="capture-btn">Anotar</button>
+    </form>
+    <p class="status" id="status">Cargando tus pendientes…</p>
+  </header>
+
+  <div class="layout">
+    <section class="sec-hoy" aria-labelledby="hoy-title">
+      <div class="hoy-head">
+        <span class="eyebrow">Hoy</span>
+        <h2 id="hoy-title"></h2>
+        <div class="hoy-sub"><span id="hoy-count"></span><span id="hoy-carry"></span></div>
+      </div>
+      <div class="stack" id="hoy-list"></div>
+    </section>
+
+    <section class="sec-rec" aria-labelledby="h-rec">
+      <div class="sec-head"><h2 id="h-rec">Recientes</h2><span class="count" id="rec-count">0</span></div>
+      <p class="hint">Lo que anotas cae aquí. Toca Casa, Uni o Trabajo para acomodarlo.</p>
+      <div class="stack" id="rec-list"></div>
+    </section>
+
+    <section class="sec-week" aria-labelledby="h-week">
+      <div class="sec-head">
+        <h2 id="h-week">Semana</h2>
+        <div class="weeknav">
+          <span class="range" id="week-range"></span>
+          <button class="ghost icon" data-act="weekprev" aria-label="Semana anterior">‹</button>
+          <button class="ghost" data-act="weektoday">Esta semana</button>
+          <button class="ghost icon" data-act="weeknext" aria-label="Semana siguiente">›</button>
+        </div>
+      </div>
+      <div class="week" id="week"></div>
+    </section>
+
+    <section class="sec-sin" aria-labelledby="h-sin">
+      <div class="sec-head"><h2 id="h-sin">Sin día</h2><span class="count" id="sin-count">0</span></div>
+      <div class="tabs" id="sin-tabs" role="group" aria-label="Filtrar por área">
+        <button data-tab="todas" aria-pressed="true">Todas</button>
+        <button data-tab="casa" aria-pressed="false">Casa</button>
+        <button data-tab="uni" aria-pressed="false">Uni</button>
+        <button data-tab="trabajo" aria-pressed="false">Trabajo</button>
+      </div>
+      <div class="stack drop" id="sin-list" data-drop="none"></div>
+    </section>
+  </div>
+</div>
+
+<dialog id="editor">
+  <form class="ed" id="ed-form" method="dialog">
+    <h3 id="ed-heading">Editar</h3>
+    <div class="field">
+      <label for="ed-titulo">Qué hay que hacer</label>
+      <input id="ed-titulo" type="text" required>
+    </div>
+    <div class="field">
+      <span class="lbl">Área</span>
+      <div class="seg" id="ed-area">
+        <label><input type="radio" name="ed-area" id="ed-area-casa" value="casa"> Casa</label>
+        <label><input type="radio" name="ed-area" id="ed-area-uni" value="uni"> Uni</label>
+        <label><input type="radio" name="ed-area" id="ed-area-trabajo" value="trabajo"> Trabajo</label>
+        <label><input type="radio" name="ed-area" id="ed-area-none" value=""> Sin área</label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="ed-sub">Dentro de</label>
+      <select id="ed-sub"></select>
+    </div>
+    <div class="field">
+      <label for="ed-dia">Día</label>
+      <div class="row">
+        <input id="ed-dia" type="date" style="flex:1;min-width:0">
+        <button type="button" class="mini" data-ed="hoy">Hoy</button>
+        <button type="button" class="mini" data-ed="manana">Mañana</button>
+        <button type="button" class="mini" data-ed="sindia">Sin día</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl">Se repite</span>
+      <div class="seg" id="ed-rep">
+        <label><input type="checkbox" id="ed-rep-0" value="0"> Lun</label>
+        <label><input type="checkbox" id="ed-rep-1" value="1"> Mar</label>
+        <label><input type="checkbox" id="ed-rep-2" value="2"> Mié</label>
+        <label><input type="checkbox" id="ed-rep-3" value="3"> Jue</label>
+        <label><input type="checkbox" id="ed-rep-4" value="4"> Vie</label>
+        <label><input type="checkbox" id="ed-rep-5" value="5"> Sáb</label>
+        <label><input type="checkbox" id="ed-rep-6" value="6"> Dom</label>
+      </div>
+    </div>
+    <label class="chk"><input type="checkbox" id="ed-oblig"> Obligatorio o con fecha de entrega</label>
+    <div class="field">
+      <label for="ed-nota">Nota</label>
+      <textarea id="ed-nota" placeholder="Opcional"></textarea>
+    </div>
+    <div class="ed-foot">
+      <button type="button" class="danger" id="ed-delete">Eliminar</button>
+      <span class="spacer"></span>
+      <button type="button" class="ghost" id="ed-cancel">Cancelar</button>
+      <button type="submit" class="primary" id="ed-save">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+// La llave publicable puede ir en el código: los datos los protege RLS en Supabase.
+const SUPABASE_URL = "https://yuusedshkqztfzofcasq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_oo5Z5WAO6dC4uE4LjcXEZA_NtGS3w_o";
+
+const AREAS = {
+  casa: { label: "Casa", subs: ["Pendientes", "Personal"] },
+  uni: { label: "Uni", subs: ["Tareas", "Proyectos", "Eventos", "Encuestas", "Titulación", "Tesina"] },
+  trabajo: { label: "Trabajo", subs: ["CoCloset", "Simcha", "General"] },
+};
+const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const DIAS_L = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
+const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const MESES_L = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+// ---------- fechas (siempre locales, "YYYY-MM-DD") ----------
+const pad = (n) => String(n).padStart(2, "0");
+const keyOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseKey = (k) => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
+const todayKey = () => keyOf(new Date());
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); };
+const weekday = (k) => (parseKey(k).getDay() + 6) % 7; // 0 = lunes
+const mondayOf = (k) => addDays(k, -weekday(k));
+function isoWeek(k) {
+  const d = parseKey(k);
+  d.setDate(d.getDate() + 3 - weekday(k));
+  const jan4 = new Date(d.getFullYear(), 0, 4);
+  return 1 + Math.round(((d - jan4) / 864e5 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
+}
+const shortDate = (k) => { const d = parseKey(k); return `${d.getDate()} ${MESES[d.getMonth()]}`; };
+
+// ---------- estado ----------
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+});
+let session = null;
+let loaded = false;
+let tasks = new Map();
+let weekStart = mondayOf(todayKey());
+let sinTab = "todas";
+try { sinTab = localStorage.getItem("mi-semana-tab") || "todas"; } catch (e) {}
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ---------- datos (Supabase) ----------
+const fromRow = (r) => ({
+  titulo: r.titulo, area: r.area, sub: r.sub, dia: r.dia, hecho: r.hecho, hechaEn: r.hecha_en,
+  obligatorio: r.obligatorio, nota: r.nota, repite: r.repite || [], siguiente: r.siguiente, creada: r.creada,
+});
+function toRow(data) {
+  const row = { ...data };
+  if ("hechaEn" in row) { row.hecha_en = row.hechaEn; delete row.hechaEn; }
+  return row;
+}
+
+async function loadAll() {
+  const { data, error } = await sb.from("tareas").select("*");
+  if (error) { setStatus("No se pudieron cargar tus pendientes. Revisa tu conexión.", true); return; }
+  tasks = new Map(data.map((r) => [r.id, fromRow(r)]));
+  loaded = true;
+  setStatus("");
+  render();
+}
+
+// Una escritura a la vez por tarea; mientras haya escrituras pendientes no se recarga desde el servidor.
+const queues = {};
+let pending = 0;
+function write(id, fn) {
+  pending++;
+  const p = (queues[id] || Promise.resolve())
+    .then(fn)
+    .catch(handleWriteError)
+    .finally(() => { pending--; });
+  queues[id] = p;
+  return p;
+}
+async function run(q) { const { error } = await q; if (error) throw error; }
+function patch(id, data) {
+  const t = tasks.get(id); if (!t) return;
+  tasks.set(id, { ...t, ...data });
+  render();
+  return write(id, () => run(sb.from("tareas").update(toRow(data)).eq("id", id)));
+}
+function insertTask(id, body) {
+  tasks.set(id, body);
+  render();
+  return write(id, () => run(sb.from("tareas").insert({ id, ...toRow(body) })));
+}
+function removeTask(id) {
+  tasks.delete(id);
+  render();
+  return write(id, () => run(sb.from("tareas").delete().eq("id", id)));
+}
+function handleWriteError() {
+  toast("No se guardó el cambio. Revisa tu conexión.");
+  scheduleRefetch();
+}
+
+let refetchTimer;
+function scheduleRefetch() {
+  clearTimeout(refetchTimer);
+  refetchTimer = setTimeout(() => (pending > 0 ? scheduleRefetch() : loadAll()), 400);
+}
+
+let channel = null;
+function subscribe() {
+  if (channel) return;
+  channel = sb.channel("tareas-cambios")
+    .on("postgres_changes", { event: "*", schema: "public", table: "tareas" }, scheduleRefetch)
+    .subscribe();
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200);
+}
+function setStatus(msg, warn) {
+  const s = $("status");
+  s.textContent = msg || ""; s.hidden = !msg; s.classList.toggle("warn", !!warn);
+}
+
+// ---------- render ----------
+function decorate() {
+  const today = todayKey();
+  return [...tasks.entries()].map(([id, t]) => {
+    const carry = !!(t.dia && t.dia < today && !t.hecho);
+    return { id, ...t, _carry: carry, _day: carry ? today : t.dia || null };
+  });
+}
+const sortItems = (a, b) =>
+  (a.hecho ? 1 : 0) - (b.hecho ? 1 : 0) ||
+  (b.obligatorio ? 1 : 0) - (a.obligatorio ? 1 : 0) ||
+  String(a.creada || "").localeCompare(String(b.creada || ""));
+
+function repLabel(rep) {
+  if (rep.length === 7) return "diario";
+  return [...rep].sort((a, b) => a - b).map((i) => DIAS[i]).join(" ");
+}
+
+function badge(t) {
+  if (!t.area || !AREAS[t.area]) return '<span class="badge">Sin área</span>';
+  const sub = t.sub ? ` · ${esc(t.sub)}` : "";
+  return `<span class="badge ${t.area}">${AREAS[t.area].label}${sub}</span>`;
+}
+
+function card(t, mode) {
+  const today = todayKey();
+  let actions = "";
+  if (mode === "week" && !t.hecho) {
+    const prevBlocked = addDays(t._day, -1) < today;
+    actions = `<div class="actions">
+      <button class="mini arrow" data-act="prev" aria-label="Pasar al día anterior"${prevBlocked ? " disabled" : ""}>‹ Antes</button>
+      <button class="mini arrow" data-act="next" aria-label="Pasar al día siguiente">Después ›</button>
+    </div>`;
+  } else if (mode === "inbox") {
+    actions = `<div class="actions">${Object.keys(AREAS).map((a) =>
+      `<button class="mini pick-${a}" data-act="area" data-area="${a}">${AREAS[a].label}</button>`).join("")}</div>`;
+  } else if (mode === "backlog") {
+    actions = `<div class="actions">
+      <button class="mini" data-act="settoday">Hoy</button>
+      <button class="mini" data-act="settomorrow">Mañana</button>
+      <button class="mini" data-act="edit">Elegir día…</button>
+    </div>`;
+  }
+  const extras = [];
+  if (mode !== "inbox") extras.push(badge(t));
+  if (t.obligatorio) extras.push('<span class="flag">⚑ Obligatorio</span>');
+  if (t._carry && mode === "week") extras.push(`<span class="carry">viene del ${DIAS_L[weekday(t.dia)]} ${parseKey(t.dia).getDate()}</span>`);
+  if (Array.isArray(t.repite) && t.repite.length) extras.push(`<span class="note-dot">↻ ${repLabel(t.repite)}</span>`);
+  if (t.nota) extras.push('<span class="note-dot">· nota</span>');
+  const drag = mode !== "inbox" && !t.hecho ? ' draggable="true"' : "";
+  return `<article class="card${t.hecho ? " done" : ""}" data-id="${esc(t.id)}"${drag}>
+    <button class="check" data-act="done" aria-label="${t.hecho ? "Marcar como pendiente" : "Marcar como hecho"}">${CHECK_SVG}</button>
+    <button class="title" data-act="edit">${esc(t.titulo || "(sin título)")}</button>
+    ${extras.length ? `<div class="meta">${extras.join("")}</div>` : ""}
+    ${actions}
+  </article>`;
+}
+
+function render() {
+  const today = todayKey();
+  const d = parseKey(today);
+  $("hoy-title").textContent = `${DIAS_L[weekday(today)][0].toUpperCase()}${DIAS_L[weekday(today)].slice(1)} ${d.getDate()} de ${MESES_L[d.getMonth()]}`;
+  $("today-week").textContent = `Semana ${isoWeek(today)}`;
+
+  const list = decorate();
+
+  // Hoy: lo de hoy + lo que se quedó pendiente de días anteriores
+  const hoy = list.filter((t) => t._day === today).sort(sortItems);
+  const hechas = hoy.filter((t) => t.hecho).length;
+  const arrastradas = hoy.filter((t) => t._carry).length;
+  $("hoy-count").textContent = hoy.length ? `${hechas} de ${hoy.length} hechas` : "";
+  $("hoy-carry").textContent = arrastradas ? `· ${arrastradas} ${arrastradas === 1 ? "viene" : "vienen"} de días anteriores` : "";
+  $("hoy-list").innerHTML = hoy.length
+    ? hoy.map((t) => card(t, "week")).join("")
+    : `<p class="empty">${loaded ? "Nada para hoy. Toca “Hoy” en Sin día o el + de un día." : "Cargando…"}</p>`;
+
+  // Recientes
+  const rec = list.filter((t) => !t.area && !t.hecho).sort(sortItems);
+  $("rec-count").textContent = rec.length;
+  $("rec-count").classList.toggle("many", rec.length >= 8);
+  $("rec-list").innerHTML = rec.length
+    ? rec.map((t) => card(t, "inbox")).join("")
+    : `<p class="empty">${loaded ? "Nada por acomodar. Lo que anotes arriba aparece aquí." : "Cargando…"}</p>`;
+
+  // Semana
+  const end = addDays(weekStart, 6);
+  $("week-range").textContent = `Sem ${isoWeek(weekStart)} · ${shortDate(weekStart)} – ${shortDate(end)}`;
+  let html = "";
+  for (let i = 0; i < 7; i++) {
+    const dk = addDays(weekStart, i);
+    const items = list.filter((t) => t._day === dk).sort(sortItems);
+    const cls = dk === today ? " today" : dk < today ? " past" : "";
+    html += `<div class="day${cls}" data-drop="${dk}">
+      <div class="day-head">
+        <span class="dn">${DIAS[i]}</span><span class="dd">${parseKey(dk).getDate()}</span>
+        ${dk === today ? '<span class="tag">Hoy</span>' : ""}
+        <button class="add" data-act="addday" data-day="${dk}" aria-label="Agregar al ${DIAS_L[i]}">+</button>
+      </div>
+      <div class="day-items">${items.map((t) => card(t, "week")).join("")}</div>
+    </div>`;
+  }
+  $("week").innerHTML = html;
+
+  // Sin día
+  const sinAll = list.filter((t) => t.area && !t.dia && !t.hecho);
+  const sin = sinAll.filter((t) => sinTab === "todas" || t.area === sinTab).sort(sortItems);
+  $("sin-count").textContent = sinAll.length;
+  document.querySelectorAll("#sin-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === sinTab)));
+  $("sin-list").innerHTML = sin.length
+    ? sin.map((t) => card(t, "backlog")).join("")
+    : `<p class="empty">${loaded ? "Nada pendiente sin día aquí." : "Cargando…"}</p>`;
+}
+
+// ---------- acciones ----------
+function addTask(data) {
+  const body = { titulo: "", area: null, sub: null, dia: null, hecho: false, hechaEn: null, obligatorio: false, nota: "", repite: [], siguiente: null, creada: new Date().toISOString(), ...data };
+  return insertTask(crypto.randomUUID(), body);
+}
+
+function toggleDone(id) {
+  const t = tasks.get(id); if (!t) return;
+  const today = todayKey();
+  if (!t.hecho) {
+    const upd = { hecho: true, hechaEn: today };
+    if (!t.dia || t.dia < today) upd.dia = today;
+    // Si se repite, crea la siguiente en el próximo día que le toca.
+    const rep = Array.isArray(t.repite) ? t.repite : [];
+    if (rep.length) {
+      let next = addDays(upd.dia || t.dia, 1);
+      for (let i = 0; i < 7 && !rep.includes(weekday(next)); i++) next = addDays(next, 1);
+      const nid = crypto.randomUUID();
+      upd.siguiente = nid;
+      insertTask(nid, {
+        titulo: t.titulo, area: t.area || null, sub: t.sub || null, obligatorio: !!t.obligatorio, nota: t.nota || "",
+        repite: rep, dia: next, hecho: false, hechaEn: null, siguiente: null, creada: new Date().toISOString(),
+      });
+    }
+    patch(id, upd);
+  } else {
+    const upd = { hecho: false, hechaEn: null };
+    if (t.siguiente) {
+      const nx = tasks.get(t.siguiente);
+      if (nx && !nx.hecho) removeTask(t.siguiente);
+      upd.siguiente = null;
+    }
+    patch(id, upd);
+  }
+}
+
+function moveBy(id, n) {
+  const t = decorate().find((x) => x.id === id); if (!t || !t._day) return;
+  const target = addDays(t._day, n);
+  if (target < todayKey() && !t.hecho) return;
+  patch(id, { dia: target });
+}
+
+function setDay(id, dk) {
+  const t = tasks.get(id); if (!t) return;
+  if (dk && dk < todayKey() && !t.hecho) dk = todayKey();
+  patch(id, { dia: dk });
+}
+
+document.addEventListener("click", (e) => {
+  const tabBtn = e.target.closest("#sin-tabs button");
+  if (tabBtn) {
+    sinTab = tabBtn.dataset.tab;
+    try { localStorage.setItem("mi-semana-tab", sinTab); } catch (err) {}
+    render(); return;
+  }
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const act = el.dataset.act;
+  const id = el.closest(".card")?.dataset.id;
+  switch (act) {
+    case "weekprev": weekStart = addDays(weekStart, -7); render(); break;
+    case "weeknext": weekStart = addDays(weekStart, 7); render(); break;
+    case "weektoday":
+      weekStart = mondayOf(todayKey()); render();
+      document.querySelector(".day.today")?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      break;
+    case "done": toggleDone(id); break;
+    case "prev": moveBy(id, -1); break;
+    case "next": moveBy(id, 1); break;
+    case "area": patch(id, { area: el.dataset.area }); toast(`Movido a ${AREAS[el.dataset.area].label}`); break;
+    case "settoday": setDay(id, todayKey()); break;
+    case "settomorrow": setDay(id, addDays(todayKey(), 1)); break;
+    case "edit": openEditor(id); break;
+    case "addday": openEditor(null, el.dataset.day); break;
+  }
+});
+
+// Captura rápida
+$("capture").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = $("capture-input");
+  const titulo = input.value.trim();
+  if (!titulo) return;
+  input.value = "";
+  addTask({ titulo });
+  toast("Anotado en Recientes");
+  input.focus();
+});
+
+// Arrastrar y soltar (escritorio)
+let dragId = null;
+document.addEventListener("dragstart", (e) => {
+  const c = e.target.closest?.(".card[draggable='true']"); if (!c) return;
+  dragId = c.dataset.id; c.classList.add("dragging");
+  e.dataTransfer.effectAllowed = "move";
+  try { e.dataTransfer.setData("text/plain", dragId); } catch (err) {}
+});
+document.addEventListener("dragend", () => {
+  dragId = null;
+  document.querySelectorAll(".dragging,.over").forEach((n) => n.classList.remove("dragging", "over"));
+});
+document.addEventListener("dragover", (e) => {
+  const z = dragId && e.target.closest?.("[data-drop]"); if (!z) return;
+  e.preventDefault();
+  document.querySelectorAll(".over").forEach((n) => n !== z && n.classList.remove("over"));
+  z.classList.add("over");
+});
+document.addEventListener("drop", (e) => {
+  const z = dragId && e.target.closest?.("[data-drop]"); if (!z) return;
+  e.preventDefault();
+  const id = dragId;
+  z.classList.remove("over");
+  setDay(id, z.dataset.drop === "none" ? null : z.dataset.drop);
+});
+
+// ---------- editor ----------
+let edId = null;
+const dlg = $("editor");
+function fillSubs(area, current) {
+  const sel = $("ed-sub");
+  const subs = AREAS[area]?.subs || [];
+  sel.innerHTML = `<option value="">—</option>` + subs.map((s) => `<option${s === current ? " selected" : ""}>${esc(s)}</option>`).join("");
+  sel.disabled = !subs.length;
+}
+function openEditor(id, presetDay) {
+  edId = id;
+  const t = id ? tasks.get(id) : { titulo: "", area: null, sub: null, dia: presetDay || null, obligatorio: false, nota: "", repite: [] };
+  if (!t) return;
+  $("ed-heading").textContent = id ? "Editar pendiente" : `Nuevo para el ${DIAS_L[weekday(presetDay)]} ${parseKey(presetDay).getDate()}`;
+  $("ed-titulo").value = t.titulo || "";
+  const areaVal = t.area || "";
+  document.querySelectorAll('input[name="ed-area"]').forEach((r) => (r.checked = r.value === areaVal));
+  fillSubs(t.area, t.sub);
+  $("ed-dia").value = t.dia || "";
+  $("ed-oblig").checked = !!t.obligatorio;
+  const rep = Array.isArray(t.repite) ? t.repite : [];
+  document.querySelectorAll("#ed-rep input").forEach((c) => (c.checked = rep.includes(Number(c.value))));
+  $("ed-nota").value = t.nota || "";
+  const del = $("ed-delete");
+  del.hidden = !id; del.classList.remove("armed"); del.textContent = "Eliminar";
+  dlg.showModal();
+  if (!id) $("ed-titulo").focus();
+}
+$("ed-area").addEventListener("change", (e) => fillSubs(e.target.value, null));
+$("ed-cancel").addEventListener("click", () => dlg.close());
+document.querySelectorAll("[data-ed]").forEach((b) => b.addEventListener("click", () => {
+  const v = b.dataset.ed;
+  $("ed-dia").value = v === "hoy" ? todayKey() : v === "manana" ? addDays(todayKey(), 1) : "";
+}));
+$("ed-delete").addEventListener("click", () => {
+  const del = $("ed-delete");
+  if (!del.classList.contains("armed")) { del.classList.add("armed"); del.textContent = "¿Seguro? Toca otra vez"; return; }
+  const id = edId; dlg.close();
+  removeTask(id);
+  toast("Eliminado");
+});
+$("ed-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const titulo = $("ed-titulo").value.trim();
+  if (!titulo) { $("ed-titulo").focus(); return; }
+  const area = document.querySelector('input[name="ed-area"]:checked')?.value || null;
+  const data = {
+    titulo,
+    area,
+    sub: area ? $("ed-sub").value || null : null,
+    dia: $("ed-dia").value || null,
+    obligatorio: $("ed-oblig").checked,
+    repite: [...document.querySelectorAll("#ed-rep input:checked")].map((c) => Number(c.value)),
+    nota: $("ed-nota").value.trim(),
+  };
+  dlg.close();
+  if (edId) patch(edId, data);
+  else { addTask(data); toast("Agregado"); }
+});
+
+// ---------- login con código por correo ----------
+// Código en lugar de enlace: en iPhone la app de inicio no comparte sesión con Safari.
+let loginEmail = "";
+function loginMsg(msg, warn) { const m = $("login-msg"); m.textContent = msg || ""; m.classList.toggle("warn", !!warn); }
+$("login-email-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginEmail = $("login-email").value.trim();
+  $("login-send").disabled = true;
+  loginMsg("Enviando…");
+  const { error } = await sb.auth.signInWithOtp({ email: loginEmail, options: { emailRedirectTo: location.origin + location.pathname } });
+  $("login-send").disabled = false;
+  if (error) {
+    loginMsg(error.status === 429 ? "Pediste muchos códigos seguidos. Espera unos minutos y vuelve a intentar." : `No se pudo enviar el código: ${error.message}`, true);
+    return;
+  }
+  $("login-email-form").hidden = true;
+  $("login-code-form").hidden = false;
+  loginMsg(`Te mandamos un código a ${loginEmail}. Revisa también spam.`);
+  $("login-code").focus();
+});
+$("login-code-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("login-verify").disabled = true;
+  const { error } = await sb.auth.verifyOtp({ email: loginEmail, token: $("login-code").value.trim(), type: "email" });
+  $("login-verify").disabled = false;
+  if (error) loginMsg("El código no es válido o ya caducó. Pide uno nuevo.", true);
+});
+$("login-back").addEventListener("click", () => {
+  $("login-code-form").hidden = true;
+  $("login-email-form").hidden = false;
+  loginMsg("");
+});
+$("logout").addEventListener("click", () => sb.auth.signOut());
+
+function applySession(s) {
+  const had = !!session;
+  session = s;
+  $("login").hidden = !!s;
+  $("app").hidden = !s;
+  if (s && !had) { render(); loadAll(); subscribe(); }
+  if (!s) {
+    tasks = new Map(); loaded = false;
+    if (channel) { sb.removeChannel(channel); channel = null; }
+  }
+}
+
+// ---------- arranque ----------
+// "Hoy" sale del reloj del dispositivo; si cambia el día con la página abierta, avanza solo.
+let lastToday = todayKey();
+function checkDayChange() {
+  const now = todayKey();
+  if (now === lastToday) return;
+  if (weekStart === mondayOf(lastToday)) weekStart = mondayOf(now);
+  lastToday = now;
+  render();
+}
+setInterval(checkDayChange, 60000);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden || !session) return;
+  checkDayChange();
+  loadAll(); // al volver a la app, trae lo que cambiaste en otro dispositivo
+});
+
+// Diferido: llamar a Supabase dentro de este callback puede bloquear la sesión.
+sb.auth.onAuthStateChange((_event, s) => setTimeout(() => applySession(s), 0));
+sb.auth.getSession().then(({ data }) => applySession(data.session));
+</script>
+</body>
+</html>
