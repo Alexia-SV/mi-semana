@@ -64,6 +64,16 @@ button{cursor:pointer}
 /* Portada + título */
 .cover{position:relative;border-radius:18px;overflow:hidden;height:clamp(118px,15vw,196px);background:#151a36}
 .cover svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* Cielo y árboles de cada temporada (la portada es una ilustración: igual en tema claro y oscuro) */
+.cover{--sky1:#151a36;--sky2:#3b2d52;--sky3:#9a4f3c;--sky4:#d79b44;--tree:#2e3a1b}
+.cover[data-season="invierno"]{--sky1:#0f1630;--sky2:#24345c;--sky3:#5d6f9a;--sky4:#b7c3d9;--tree:#1d2230}
+.cover[data-season="primavera"]{--sky1:#1d2347;--sky2:#4a3a6b;--sky3:#c06a8a;--sky4:#f2b5a0;--tree:#35522a}
+.cover[data-season="verano"]{--sky1:#142046;--sky2:#2f4f7a;--sky3:#c9784a;--sky4:#f2c14e;--tree:#2f5a2a}
+.cover .s-otono,.cover .s-invierno,.cover .s-primavera,.cover .s-verano{display:none}
+.cover[data-season="otono"] .s-otono,.cover[data-season="invierno"] .s-invierno,.cover[data-season="primavera"] .s-primavera,.cover[data-season="verano"] .s-verano{display:inline}
+.page-icon.sleep::after{content:"💤";position:absolute;top:-6px;right:-10px;font-size:24px;animation:zz 2.4s ease-in-out infinite}
+@keyframes zz{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion: reduce){.page-icon.sleep::after{animation:none}}
 .titlebar{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;padding-left:18px;margin-top:8px}
 .page-icon{width:84px;height:84px;border-radius:50%;background:var(--surface);display:grid;place-items:center;box-shadow:0 0 0 5px var(--bg);margin:-50px 0 0 18px;position:relative}
 .page-icon img{width:54px;height:54px}
@@ -356,11 +366,11 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 
 <div class="wrap" id="app" hidden>
   <header>
-    <div class="cover" aria-hidden="true">
+    <div class="cover" id="cover" data-season="otono" aria-hidden="true">
       <svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMax slice">
         <defs>
           <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#151a36"/><stop offset=".45" stop-color="#3b2d52"/><stop offset=".8" stop-color="#9a4f3c"/><stop offset="1" stop-color="#d79b44"/>
+            <stop offset="0" style="stop-color:var(--sky1)"/><stop offset=".45" style="stop-color:var(--sky2)"/><stop offset=".8" style="stop-color:var(--sky3)"/><stop offset="1" style="stop-color:var(--sky4)"/>
           </linearGradient>
           <mask id="moon-cut"><rect width="1200" height="220" fill="#fff"/><circle cx="858" cy="44" r="23" fill="#000"/></mask>
         </defs>
@@ -411,11 +421,39 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
           <rect x="796" y="162" width="6" height="8"/><rect x="948" y="150" width="6" height="8"/><rect x="968" y="176" width="6" height="8"/><rect x="214" y="182" width="6" height="8"/>
           <rect x="676" y="176" width="5" height="9"/><rect x="760" y="176" width="5" height="9"/><rect x="852" y="180" width="6" height="8"/><rect x="1056" y="170" width="6" height="8"/>
         </g>
-        <g fill="#2e3a1b">
+        <g style="fill:var(--tree)">
           <circle cx="282" cy="196" r="22"/><circle cx="300" cy="204" r="16"/><circle cx="660" cy="200" r="18"/><circle cx="900" cy="196" r="24"/>
           <circle cx="1010" cy="200" r="20"/><circle cx="120" cy="194" r="24"/><circle cx="1180" cy="196" r="22"/>
         </g>
-        <g>
+        <!-- invierno: nieve en los techos y copos -->
+        <g class="s-invierno" fill="none" stroke="#eef2fa" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M472 140 L501 116 L530 140"/><path d="M586 128 L617 104 L648 128"/><path d="M780 150 L809 128 L838 150"/>
+          <path d="M936 138 L961 118 L986 138"/><path d="M200 170 L235 148 L270 170"/><path d="M698 112 Q720 80 742 112"/>
+          <path d="M532 150 H548 M566 150 H584"/><path d="M384 40 L400 6 L416 40"/><path d="M0 176 H90 M1110 168 H1200 M838 166 H892 M1040 156 H1086"/>
+        </g>
+        <g class="s-invierno" fill="#eef2fa">
+          <circle cx="40" cy="70" r="1.8"/><circle cx="110" cy="120" r="1.4"/><circle cx="180" cy="40" r="2"/><circle cx="240" cy="130" r="1.6"/><circle cx="330" cy="90" r="1.9"/>
+          <circle cx="450" cy="60" r="1.5"/><circle cx="520" cy="100" r="2"/><circle cx="640" cy="80" r="1.6"/><circle cx="700" cy="40" r="1.8"/><circle cx="770" cy="110" r="1.4"/>
+          <circle cx="880" cy="96" r="2"/><circle cx="950" cy="60" r="1.5"/><circle cx="1030" cy="110" r="1.8"/><circle cx="1090" cy="70" r="1.6"/><circle cx="1160" cy="120" r="2"/>
+          <circle cx="600" cy="150" r="1.5"/><circle cx="860" cy="150" r="1.7"/><circle cx="150" cy="160" r="1.5"/><circle cx="1000" cy="160" r="1.6"/><circle cx="420" cy="130" r="1.4"/>
+        </g>
+        <!-- primavera: flores en los árboles y pétalos -->
+        <g class="s-primavera" fill="#f08bb0">
+          <circle cx="270" cy="186" r="3"/><circle cx="292" cy="182" r="2.6"/><circle cx="300" cy="198" r="2.4"/><circle cx="650" cy="192" r="2.6"/><circle cx="668" cy="196" r="2.2"/>
+          <circle cx="886" cy="186" r="3"/><circle cx="910" cy="190" r="2.6"/><circle cx="1000" cy="194" r="2.6"/><circle cx="1020" cy="190" r="2.2"/><circle cx="110" cy="186" r="3"/>
+          <circle cx="132" cy="190" r="2.4"/><circle cx="1172" cy="188" r="2.8"/><circle cx="1190" cy="196" r="2.2"/>
+          <ellipse cx="170" cy="60" rx="4" ry="2.2" transform="rotate(-30 170 60)"/><ellipse cx="300" cy="110" rx="4" ry="2.2" transform="rotate(20 300 110)"/>
+          <ellipse cx="640" cy="50" rx="4" ry="2.2" transform="rotate(40 640 50)"/><ellipse cx="960" cy="96" rx="4" ry="2.2" transform="rotate(-15 960 96)"/>
+          <ellipse cx="1100" cy="60" rx="4" ry="2.2" transform="rotate(35 1100 60)"/><ellipse cx="470" cy="90" rx="4" ry="2.2" transform="rotate(60 470 90)"/>
+        </g>
+        <!-- verano: luciérnagas -->
+        <g class="s-verano" fill="#f6dd6a">
+          <circle cx="250" cy="170" r="6" opacity=".2"/><circle cx="250" cy="170" r="1.8"/><circle cx="640" cy="176" r="6" opacity=".2"/><circle cx="640" cy="176" r="1.8"/>
+          <circle cx="880" cy="170" r="6" opacity=".2"/><circle cx="880" cy="170" r="1.8"/><circle cx="1030" cy="178" r="6" opacity=".2"/><circle cx="1030" cy="178" r="1.8"/>
+          <circle cx="140" cy="168" r="6" opacity=".2"/><circle cx="140" cy="168" r="1.8"/><circle cx="1160" cy="172" r="6" opacity=".2"/><circle cx="1160" cy="172" r="1.8"/>
+          <circle cx="470" cy="150" r="5" opacity=".2"/><circle cx="470" cy="150" r="1.5"/><circle cx="760" cy="146" r="5" opacity=".2"/><circle cx="760" cy="146" r="1.5"/>
+        </g>
+        <g class="s-otono">
           <ellipse cx="160" cy="44" rx="5" ry="2.4" fill="#c4602f" transform="rotate(-30 160 44)"/>
           <ellipse cx="262" cy="86" rx="5" ry="2.4" fill="#d99a3e" transform="rotate(20 262 86)"/>
           <ellipse cx="680" cy="34" rx="5" ry="2.4" fill="#7d8a35" transform="rotate(40 680 34)"/>
@@ -425,7 +463,7 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
         </g>
       </svg>
     </div>
-    <div class="page-icon"><img src="img/black_cat_flat.svg" alt=""></div>
+    <div class="page-icon" id="page-icon"><img src="img/black_cat_flat.svg" alt=""></div>
     <div class="titlebar">
       <div class="title-text">
         <h1>Mi semana</h1>
@@ -735,12 +773,23 @@ function toRow(data) {
   return row;
 }
 
+// Se cargan los pendientes abiertos, lo hecho en los últimos 60 días y todo el historial de hábitos (para las rachas).
+// Lo más viejo se queda guardado en Supabase, solo no se descarga.
+const ARCHIVO_DIAS = 60;
 async function loadAll() {
-  const { data, error } = await sb.from("tareas").select("*");
-  if (error) { setStatus("No se pudieron cargar tus pendientes. Revisa tu conexión.", true); return; }
+  await flushOutbox();
+  if (outbox.length) { syncStatus(); return; } // sigue sin internet: se muestra la copia local
+  const desde = addDays(todayKey(), -ARCHIVO_DIAS);
+  const { data, error } = await sb.from("tareas").select("*")
+    .or(`hecho.eq.false,dia.gte.${desde},sub.in.(${HABITOS.map((h) => h.sub).join(",")})`);
+  if (error) {
+    if (loaded) syncStatus(true);
+    else setStatus("No se pudieron cargar tus pendientes. Revisa tu conexión.", true);
+    return;
+  }
   tasks = new Map(data.map((r) => [r.id, fromRow(r)]));
   loaded = true;
-  setStatus("");
+  syncStatus();
   render();
   ensureHabitTasks();
   checkAviso();
@@ -780,18 +829,85 @@ function patch(id, data) {
   const t = tasks.get(id); if (!t) return;
   tasks.set(id, { ...t, ...data });
   render();
-  return write(id, () => run(sb.from("tareas").update(toRow(data)).eq("id", id)));
+  return sendOp({ op: "update", id, data });
 }
 function insertTask(id, body) {
   tasks.set(id, body);
   render();
-  return write(id, () => run(sb.from("tareas").insert({ id, ...toRow(body) })));
+  return sendOp({ op: "insert", id, data: body });
 }
 function removeTask(id) {
   tasks.delete(id);
   render();
-  return write(id, () => run(sb.from("tareas").delete().eq("id", id)));
+  return sendOp({ op: "delete", id });
 }
+
+// ---------- sin conexión ----------
+// Cada cambio es una operación; si no hay internet se guarda en una cola en el dispositivo
+// y se envía en orden cuando vuelve la señal. Además se guarda una copia de los pendientes
+// para que la app abra con tus datos aunque no haya red.
+const OUTBOX_KEY = "mi-semana-por-enviar";
+const CACHE_KEY = "mi-semana-copia";
+const readJSON = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (e) { return fallback; } };
+const writeJSON = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} };
+let outbox = readJSON(OUTBOX_KEY, []);
+let flushing = false;
+function runOp(op) {
+  if (op.op === "update") return run(sb.from("tareas").update(toRow(op.data)).eq("id", op.id));
+  // upsert: si el envío se repite tras un corte, no se duplica
+  if (op.op === "insert") return run(sb.from("tareas").upsert({ id: op.id, ...toRow(op.data) }));
+  return run(sb.from("tareas").delete().eq("id", op.id));
+}
+const isOfflineError = (e) => !navigator.onLine || e instanceof TypeError || /failed to fetch|load failed|network/i.test(String(e?.message || ""));
+function queueOp(op) {
+  outbox.push(op);
+  writeJSON(OUTBOX_KEY, outbox);
+  syncStatus();
+}
+function sendOp(op) {
+  if (DEMO) return Promise.resolve();
+  // Si ya hay cambios esperando, este va detrás para respetar el orden.
+  if (outbox.length || !navigator.onLine) { queueOp(op); return Promise.resolve(); }
+  return write(op.id, () => runOp(op).catch((e) => { if (isOfflineError(e)) queueOp(op); else throw e; }));
+}
+async function flushOutbox() {
+  if (flushing || !outbox.length || !session || !navigator.onLine) return;
+  flushing = true;
+  try {
+    while (outbox.length) {
+      try { await runOp(outbox[0]); } catch (e) {
+        if (isOfflineError(e)) break;
+        handleWriteError(e); // error real: se descarta para no atorar la cola
+      }
+      outbox.shift();
+      writeJSON(OUTBOX_KEY, outbox);
+    }
+  } finally {
+    flushing = false;
+    syncStatus();
+  }
+}
+function syncStatus(failed) {
+  if (outbox.length) setStatus(`Sin conexión · ${outbox.length} ${outbox.length === 1 ? "cambio se guarda" : "cambios se guardan"} cuando vuelva el internet`, true);
+  else if (!navigator.onLine || failed) setStatus("Sin conexión · mostrando lo último guardado", true);
+  else setStatus("");
+}
+let cacheTimer;
+function saveCacheSoon() {
+  if (DEMO || !session || !loaded) return;
+  clearTimeout(cacheTimer);
+  cacheTimer = setTimeout(() => writeJSON(CACHE_KEY, { user: session.user?.id, tasks: [...tasks] }), 500);
+}
+function loadCache() {
+  const c = readJSON(CACHE_KEY, null);
+  if (!c || c.user !== session?.user?.id || !Array.isArray(c.tasks)) return false;
+  tasks = new Map(c.tasks);
+  loaded = true;
+  return true;
+}
+window.addEventListener("online", () => { if (session) loadAll(); });
+window.addEventListener("offline", () => syncStatus());
+
 function handleWriteError(e) {
   // Sin la columna "foco" en Supabase, "tus 3 de hoy" no se pueden guardar.
   if (String(e?.message || "").includes("foco")) setStatus("Falta un paso en Supabase: corre el SQL de «tus 3 de hoy» (columna foco).", true);
@@ -974,6 +1090,17 @@ function renderHabitos(list, today) {
   }).join("");
 }
 
+// La portada cambia con la temporada (hemisferio norte, como Londres y Puebla).
+function seasonOf(today) {
+  const md = today.slice(5);
+  if (md >= "12-21" || md < "03-20") return "invierno";
+  if (md < "06-21") return "primavera";
+  if (md < "09-22") return "verano";
+  return "otono";
+}
+// Para ver otra temporada: #demo-invierno, #demo-primavera, #demo-verano
+const SEASON_OVERRIDE = ["otono", "invierno", "primavera", "verano"].find((s) => location.hash === `#demo-${s}`) || null;
+
 const daysBetween = (a, b) => Math.round((parseKey(b) - parseKey(a)) / 864e5);
 // Lo que se arrastra 3 días o más se marca como atascado.
 function carryLabel(t, long) {
@@ -1003,6 +1130,7 @@ function render() {
   $("hoy-title").textContent = `${DIAS_L[weekday(today)][0].toUpperCase()}${DIAS_L[weekday(today)].slice(1)} ${d.getDate()} de ${MESES_L[d.getMonth()]}`;
   $("hoy-phrase").textContent = FRASES[dayOfYear(today) % FRASES.length];
   $("today-week").textContent = `Semana ${isoWeek(today)}`;
+  $("cover").dataset.season = SEASON_OVERRIDE || seasonOf(today);
   renderClock();
 
   const list = decorate();
@@ -1079,6 +1207,10 @@ function render() {
   document.querySelectorAll("#sin-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === sinTab)));
   $("sin-list").innerHTML = sin.length ? sin.map((t) => card(t, "backlog")).join("")
     : emptyBox("img/tulip_flat.svg", loaded ? "Nada pendiente sin día aquí." : "Cargando…");
+
+  // Monis se duerme en el icono cuando terminas todo lo de hoy
+  $("page-icon").classList.toggle("sleep", loaded && hoy.length > 0 && hoy.every((t) => t.hecho));
+  saveCacheSoon();
 }
 
 // ---------- acciones ----------
@@ -1654,9 +1786,12 @@ function applySession(s) {
   session = s;
   $("login").hidden = !!s;
   $("app").hidden = !s;
-  if (s && !had) { render(); loadAll(); subscribe(); }
+  if (s && !had) { loadCache(); render(); syncStatus(); loadAll(); subscribe(); } // primero la copia local, luego lo de Supabase
   if (!s) {
     tasks = new Map(); loaded = false;
+    // Al salir se borra lo guardado en este dispositivo.
+    outbox = [];
+    try { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(OUTBOX_KEY); } catch (e) {}
     if (channel) { sb.removeChannel(channel); channel = null; }
   }
 }
@@ -1679,6 +1814,8 @@ document.addEventListener("visibilitychange", () => {
   checkDayChange();
   loadAll(); // al volver a la app, trae lo que cambiaste en otro dispositivo
 });
+
+if ("serviceWorker" in navigator && !DEMO) navigator.serviceWorker.register("sw.js").catch(() => {});
 
 // Diferido: llamar a Supabase dentro de este callback puede bloquear la sesión.
 sb.auth.onAuthStateChange((_event, s) => setTimeout(() => applySession(s), 0));
