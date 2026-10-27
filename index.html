@@ -65,7 +65,6 @@ button{cursor:pointer}
 .login p{margin:0;color:var(--muted)}
 .login form{display:grid;gap:10px}
 .login input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:11px 12px;font-size:16px}
-.login input#login-code{letter-spacing:.3em;font-variant-numeric:tabular-nums;text-align:center;font-size:20px}
 .login .msg{font-size:13px;color:var(--muted);margin:0}
 .login .msg.warn{color:var(--danger)}
 .linkish{border:0;background:transparent;color:var(--muted);font-size:13px;text-decoration:underline;padding:0;justify-self:start}
@@ -182,15 +181,11 @@ dialog::backdrop{background:rgba(10,12,11,.45)}
 
 <div class="login" id="login" hidden>
   <h1>Mi Semana</h1>
-  <p>Escribe tu correo y te mandamos un código para entrar. Solo lo haces una vez en cada dispositivo.</p>
-  <form id="login-email-form">
-    <input id="login-email" type="email" placeholder="tu@correo.com" autocomplete="email" required>
-    <button class="primary" type="submit" id="login-send">Enviarme el código</button>
-  </form>
-  <form id="login-code-form" hidden>
-    <input id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="código" required>
-    <button class="primary" type="submit" id="login-verify">Entrar</button>
-    <button class="linkish" type="button" id="login-back">Usar otro correo</button>
+  <p>Entra con tu correo y contraseña. Solo lo haces una vez en cada dispositivo.</p>
+  <form id="login-form">
+    <input id="login-email" type="email" placeholder="tu@correo.com" autocomplete="username" required>
+    <input id="login-pass" type="password" placeholder="Contraseña" autocomplete="current-password" required>
+    <button class="primary" type="submit" id="login-send">Entrar</button>
   </form>
   <p class="msg" id="login-msg"></p>
 </div>
@@ -722,37 +717,19 @@ $("ed-form").addEventListener("submit", (e) => {
   else { addTask(data); toast("Agregado"); }
 });
 
-// ---------- login con código por correo ----------
-// Código en lugar de enlace: en iPhone la app de inicio no comparte sesión con Safari.
-let loginEmail = "";
+// ---------- login con correo y contraseña ----------
+// La cuenta se crea desde el panel de Supabase; aquí solo se entra.
 function loginMsg(msg, warn) { const m = $("login-msg"); m.textContent = msg || ""; m.classList.toggle("warn", !!warn); }
-$("login-email-form").addEventListener("submit", async (e) => {
+$("login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  loginEmail = $("login-email").value.trim();
   $("login-send").disabled = true;
-  loginMsg("Enviando…");
-  const { error } = await sb.auth.signInWithOtp({ email: loginEmail, options: { emailRedirectTo: location.origin + location.pathname } });
+  loginMsg("Entrando…");
+  const { error } = await sb.auth.signInWithPassword({ email: $("login-email").value.trim(), password: $("login-pass").value });
   $("login-send").disabled = false;
-  if (error) {
-    loginMsg(error.status === 429 ? "Pediste muchos códigos seguidos. Espera unos minutos y vuelve a intentar." : `No se pudo enviar el código: ${error.message}`, true);
-    return;
-  }
-  $("login-email-form").hidden = true;
-  $("login-code-form").hidden = false;
-  loginMsg(`Te mandamos un código a ${loginEmail}. Revisa también spam.`);
-  $("login-code").focus();
-});
-$("login-code-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  $("login-verify").disabled = true;
-  const { error } = await sb.auth.verifyOtp({ email: loginEmail, token: $("login-code").value.trim(), type: "email" });
-  $("login-verify").disabled = false;
-  if (error) loginMsg("El código no es válido o ya caducó. Pide uno nuevo.", true);
-});
-$("login-back").addEventListener("click", () => {
-  $("login-code-form").hidden = true;
-  $("login-email-form").hidden = false;
-  loginMsg("");
+  if (!error) { loginMsg(""); $("login-pass").value = ""; return; }
+  if (error.status === 400) loginMsg("Correo o contraseña incorrectos.", true);
+  else if (error.status === 429) loginMsg("Demasiados intentos. Espera unos minutos.", true);
+  else loginMsg("No se pudo entrar. Revisa tu conexión.", true);
 });
 $("logout").addEventListener("click", () => sb.auth.signOut());
 
