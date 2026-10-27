@@ -22,7 +22,7 @@
    Paleta: tarde de otoño en Londres (pergamino, olivo, menta, óxido, azul Londres) y de noche, cielo estrellado. */
 :root{
   --bg:#efe6d4; --surface:#faf5ea; --sunk:#e6dbc5; --ink:#2b221d; --muted:#7a6c5d; --line:#d8c9ae;
-  --hl:#d9a23a; --hl-ink:#2b221d; --accent:#23806c; --on-accent:#fbf3e4; --focus:#23806c; --danger:#a8322d;
+  --hl:#d9a23a; --hl-ink:#2b221d; --toast-link:#7fe0c8; --accent:#23806c; --on-accent:#fbf3e4; --focus:#23806c; --danger:#a8322d;
   --casa:#5d6b28; --uni:#2f4a85; --trabajo:#b4532a; --none:#8a7b6b; --on-area:#fbf3e4;
   --tag-casa:#556322; --tag-uni:#2f4a85; --tag-trabajo:#a64b24;
   --stars:none;
@@ -34,7 +34,7 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#11131e; --surface:#1a1d2b; --sunk:#222637; --ink:#f1e8d8; --muted:#a39d93; --line:#30354a;
-  --hl:#e2b04a; --hl-ink:#11131e; --accent:#4cc3a6; --on-accent:#0f1a17; --focus:#4cc3a6; --danger:#ff8a7a;
+  --hl:#e2b04a; --hl-ink:#11131e; --toast-link:#1a7a66; --accent:#4cc3a6; --on-accent:#0f1a17; --focus:#4cc3a6; --danger:#ff8a7a;
   --casa:#7f9135; --uni:#4d6cc0; --trabajo:#cf6a3a; --none:#5b5f70; --on-area:#fbf3e4;
   --tag-casa:#a9bd52; --tag-uni:#8ea6ec; --tag-trabajo:#f0935f;
   --stars:radial-gradient(1px 1px at 8% 12%,#f6e7c1 50%,transparent 51%),radial-gradient(1px 1px at 22% 68%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1.5px 1.5px at 37% 28%,#f6e7c1 50%,transparent 51%),radial-gradient(1px 1px at 51% 84%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1px 1px at 63% 41%,#f6e7c1 50%,transparent 51%),radial-gradient(1.5px 1.5px at 77% 9%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1px 1px at 88% 57%,#f6e7c1 50%,transparent 51%),radial-gradient(1px 1px at 94% 90%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1px 1px at 3% 47%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1.5px 1.5px at 30% 95%,#f6e7c1 50%,transparent 51%);
@@ -42,7 +42,7 @@
 }}
 :root[data-theme="dark"]{
   --bg:#11131e; --surface:#1a1d2b; --sunk:#222637; --ink:#f1e8d8; --muted:#a39d93; --line:#30354a;
-  --hl:#e2b04a; --hl-ink:#11131e; --accent:#4cc3a6; --on-accent:#0f1a17; --focus:#4cc3a6; --danger:#ff8a7a;
+  --hl:#e2b04a; --hl-ink:#11131e; --toast-link:#1a7a66; --accent:#4cc3a6; --on-accent:#0f1a17; --focus:#4cc3a6; --danger:#ff8a7a;
   --casa:#7f9135; --uni:#4d6cc0; --trabajo:#cf6a3a; --none:#5b5f70; --on-area:#fbf3e4;
   --tag-casa:#a9bd52; --tag-uni:#8ea6ec; --tag-trabajo:#f0935f;
   --stars:radial-gradient(1px 1px at 8% 12%,#f6e7c1 50%,transparent 51%),radial-gradient(1px 1px at 22% 68%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1.5px 1.5px at 37% 28%,#f6e7c1 50%,transparent 51%),radial-gradient(1px 1px at 51% 84%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1px 1px at 63% 41%,#f6e7c1 50%,transparent 51%),radial-gradient(1.5px 1.5px at 77% 9%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1px 1px at 88% 57%,#f6e7c1 50%,transparent 51%),radial-gradient(1px 1px at 94% 90%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1px 1px at 3% 47%,#f6e7c1aa 50%,transparent 51%),radial-gradient(1.5px 1.5px at 30% 95%,#f6e7c1 50%,transparent 51%);
@@ -125,6 +125,12 @@ section{min-width:0}
 .progress{height:6px;border-radius:99px;background:var(--sunk);overflow:hidden;margin-top:6px}
 .progress span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
 .sec-hoy .card{background:var(--bg)}
+.soon{display:grid;gap:3px;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1.5px dashed var(--danger)}
+.soon-title{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--danger)}
+.soon-row{display:flex;gap:10px;align-items:baseline;border:0;background:transparent;padding:3px 0;text-align:left;font-weight:700;font-size:14px;min-width:0}
+.soon-row:hover .soon-what{text-decoration:underline;text-underline-offset:3px}
+.soon-when{flex:none;min-width:86px;font-size:12.5px;font-weight:800;color:var(--danger);font-variant-numeric:tabular-nums}
+.soon-what{min-width:0;overflow-wrap:anywhere}
 
 /* Navegación de semana */
 .weeknav{display:flex;align-items:center;gap:6px;margin-left:auto}
@@ -246,7 +252,16 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 .aviso-actions img{width:18px;height:18px}
 .aviso-actions .textbtn{justify-self:center}
 
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;z-index:20;max-width:calc(100vw - 32px)}
+/* Refuerzo positivo: ventana sin bloquear la página y hojitas cayendo encima */
+#festejo{position:fixed;inset:auto;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;z-index:25;width:min(360px,calc(100vw - 32px));border:2px solid var(--hl)}
+#festejo .aviso-box img.cat{width:76px;height:76px}
+.rain{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.rain img{position:absolute;top:-40px;width:28px;height:28px;animation:caer linear forwards}
+@keyframes caer{to{transform:translateY(calc(100vh + 80px)) rotate(540deg)}}
+@media (prefers-reduced-motion: reduce){.rain{display:none}}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;z-index:20;max-width:calc(100vw - 32px);display:flex;align-items:center;gap:14px;white-space:nowrap}
+.toast button{border:0;background:transparent;color:var(--toast-link);font-weight:800;padding:2px 0;text-decoration:underline;text-underline-offset:3px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
@@ -371,6 +386,7 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
         <div class="hoy-sub"><span id="hoy-count"></span><span id="hoy-carry"></span></div>
         <div class="progress" aria-hidden="true"><span id="hoy-bar" style="width:0"></span></div>
       </div>
+      <div class="soon" id="hoy-soon" hidden></div>
       <div class="stack" id="hoy-list"></div>
     </section>
 
@@ -478,7 +494,19 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
   </div>
 </dialog>
 
-<div class="toast" id="toast" hidden></div>
+<dialog id="festejo" aria-labelledby="festejo-title">
+  <div class="aviso-box">
+    <img class="cat" id="festejo-img" src="img/cat_face_flat.svg" alt="">
+    <span class="eyebrow"><img src="img/sparkles_flat.svg" alt="">Vas muy bien</span>
+    <h3 id="festejo-title"></h3>
+    <p id="festejo-text"></p>
+    <div class="aviso-actions">
+      <button type="button" class="primary" id="festejo-ok">¡Sigo!</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden><span id="toast-msg"></span><button type="button" id="toast-undo" hidden>Deshacer</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -639,10 +667,15 @@ function subscribe() {
 }
 
 let toastTimer;
-function toast(msg) {
+// Con `undo`, el aviso trae "Deshacer" y dura un poco más.
+function toast(msg, undo) {
   const t = $("toast");
-  t.textContent = msg; t.hidden = false;
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200);
+  $("toast-msg").textContent = msg;
+  const b = $("toast-undo");
+  b.hidden = !undo;
+  b.onclick = undo ? () => { t.hidden = true; clearTimeout(toastTimer); undo(); } : null;
+  t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), undo ? 5000 : 2200);
 }
 function setStatus(msg, warn) {
   const s = $("status");
@@ -726,6 +759,12 @@ function card(t, mode) {
   </article>`;
 }
 
+// "mañana", "en 3 días · jue"
+function cuando(dk) {
+  const n = Math.round((parseKey(dk) - parseKey(todayKey())) / 864e5);
+  return n === 1 ? "mañana" : `en ${n} días · ${DIAS[weekday(dk)].toLowerCase()}`;
+}
+
 function emptyBox(icon, text) {
   return `<p class="empty"><img src="${icon}" alt="">${text}</p>`;
 }
@@ -752,6 +791,16 @@ function render() {
   $("hoy-count").textContent = hoy.length ? `${hechas} de ${hoy.length} hechas` : "";
   $("hoy-carry").textContent = arrastradas ? `· ${arrastradas} ${arrastradas === 1 ? "viene" : "vienen"} de días anteriores` : "";
   $("hoy-bar").style.width = hoy.length ? `${Math.round((hechas / hoy.length) * 100)}%` : "0";
+  // Se acerca: obligatorios de los próximos 7 días, para verlos venir
+  const limite = addDays(today, 7);
+  const soon = list.filter((t) => t.obligatorio && !t.hecho && t.dia && t.dia > today && t.dia <= limite)
+    .sort((a, b) => a.dia.localeCompare(b.dia));
+  $("hoy-soon").hidden = !soon.length;
+  $("hoy-soon").innerHTML = soon.length
+    ? '<span class="soon-title">⚑ Se acerca</span>' + soon.slice(0, 4).map((t) =>
+        `<button class="soon-row" data-act="edit" data-id="${esc(t.id)}"><span class="soon-when">${cuando(t.dia)}</span><span class="soon-what">${esc(t.titulo)}</span></button>`).join("") +
+      (soon.length > 4 ? `<span class="soft">y ${soon.length - 4} más en la semana</span>` : "")
+    : "";
   $("hoy-list").innerHTML = !loaded ? emptyBox("img/teacup_without_handle_flat.svg", "Cargando…")
     : hoy.length ? hoy.map((t) => card(t, "hoy")).join("")
     : emptyBox("img/black_cat_flat.svg", "Nada para hoy. Toca “Hoy” en Sin día o el + de un día.");
@@ -828,17 +877,55 @@ function toggleDone(id, extra = {}) {
   }
 }
 
+// ---------- cambios con "Deshacer" ----------
+function patchUndoable(id, data, msg) {
+  const t = tasks.get(id); if (!t) return;
+  const prev = {};
+  for (const k of Object.keys(data)) prev[k] = t[k] ?? (k === "repite" ? [] : k === "nota" ? "" : null);
+  patch(id, data);
+  toast(msg, () => patch(id, prev));
+}
+
+function completeUndoable(id, extra) {
+  const before = tasks.get(id); if (!before) return;
+  toggleDone(id, extra);
+  if (before.hecho) {
+    toast("Marcado como pendiente", () => toggleDone(id));
+    return;
+  }
+  const after = tasks.get(id);
+  toast(extra ? "Descansar también cuenta 🌙" : "¡Hecho!", () => {
+    if (after?.siguiente) { const nx = tasks.get(after.siguiente); if (nx && !nx.hecho) removeTask(after.siguiente); }
+    patch(id, { hecho: false, hechaEn: null, dia: before.dia ?? null, nota: before.nota ?? "", siguiente: before.siguiente ?? null });
+  });
+  maybeCelebrate();
+}
+
+function removeUndoable(id) {
+  const before = tasks.get(id); if (!before) return;
+  removeTask(id);
+  toast("Eliminado", () => insertTask(id, { ...before }));
+}
+
+function dayLabel(dk) {
+  if (!dk) return "Sin día";
+  const today = todayKey();
+  if (dk === today) return "hoy";
+  if (dk === addDays(today, 1)) return "mañana";
+  return `${DIAS_L[weekday(dk)]} ${parseKey(dk).getDate()}`;
+}
+
 function moveBy(id, n) {
   const t = decorate().find((x) => x.id === id); if (!t || !t._day) return;
   const target = addDays(t._day, n);
   if (target < todayKey() && !t.hecho) return;
-  patch(id, { dia: target });
+  patchUndoable(id, { dia: target }, `Movido a ${dayLabel(target)}`);
 }
 
 function setDay(id, dk) {
   const t = tasks.get(id); if (!t) return;
   if (dk && dk < todayKey() && !t.hecho) dk = todayKey();
-  patch(id, { dia: dk });
+  patchUndoable(id, { dia: dk }, dk ? `Movido a ${dayLabel(dk)}` : "Movido a Sin día");
 }
 
 document.addEventListener("click", (e) => {
@@ -850,7 +937,7 @@ document.addEventListener("click", (e) => {
   }
   const el = e.target.closest("[data-act]"); if (!el) return;
   const act = el.dataset.act;
-  const id = el.closest(".card")?.dataset.id;
+  const id = el.closest("[data-id]")?.dataset.id;
   switch (act) {
     case "weekprev": weekStart = addDays(weekStart, -7); render(); break;
     case "weeknext": weekStart = addDays(weekStart, 7); render(); break;
@@ -858,10 +945,10 @@ document.addEventListener("click", (e) => {
       weekStart = mondayOf(todayKey()); render();
       document.querySelector(".day.today")?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       break;
-    case "done": toggleDone(id); break;
+    case "done": completeUndoable(id); break;
     case "prev": moveBy(id, -1); break;
     case "next": moveBy(id, 1); break;
-    case "area": patch(id, { area: el.dataset.area }); toast(`Movido a ${AREAS[el.dataset.area].label}`); break;
+    case "area": patchUndoable(id, { area: el.dataset.area }, `Movido a ${AREAS[el.dataset.area].label}`); break;
     case "settoday": setDay(id, todayKey()); break;
     case "settomorrow": setDay(id, addDays(todayKey(), 1)); break;
     case "edit": openEditor(id); break;
@@ -951,8 +1038,7 @@ $("ed-delete").addEventListener("click", () => {
   const del = $("ed-delete");
   if (!del.classList.contains("armed")) { del.classList.add("armed"); del.textContent = "¿Seguro? Toca otra vez"; return; }
   const id = edId; dlg.close();
-  removeTask(id);
-  toast("Eliminado");
+  removeUndoable(id);
 });
 $("ed-form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -969,7 +1055,7 @@ $("ed-form").addEventListener("submit", (e) => {
     nota: $("ed-nota").value.trim(),
   };
   dlg.close();
-  if (edId) patch(edId, data);
+  if (edId) patchUndoable(edId, data, "Guardado");
   else { addTask(data); toast("Agregado"); }
 });
 
@@ -1000,18 +1086,72 @@ function snoozeAviso(minutes) {
 }
 $("aviso-done").addEventListener("click", () => {
   dlgAviso.close();
-  if (avisoId) toggleDone(avisoId);
-  toast("¡Bien hecho! 🐾");
+  if (avisoId) completeUndoable(avisoId);
 });
 $("aviso-rest").addEventListener("click", () => {
   dlgAviso.close();
-  if (avisoId) toggleDone(avisoId, { nota: "Hoy fue descanso 🌙" });
-  toast("Descansar también cuenta 🌙");
+  if (avisoId) completeUndoable(avisoId, { nota: "Hoy fue descanso 🌙" });
 });
 // Al ir a Band&Bloom, vuelve a preguntar en 30 min por si ya terminaste.
 $("aviso-open").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
 $("aviso-later").addEventListener("click", () => { snoozeAviso(30); dlgAviso.close(); });
 dlgAviso.addEventListener("cancel", () => snoozeAviso(30));
+
+// ---------- refuerzo positivo ----------
+// Cada 3 tareas hechas en el día (3, 6, 9…) y al terminar todo lo de Hoy; cada uno sale una sola vez al día.
+const FESTEJO_KEY = "mi-semana-festejos";
+const FESTEJOS = {
+  3: ["¡3 menos!", "Monis está impresionada. ¿Vamos por la siguiente?", "img/cat_face_flat.svg"],
+  6: ["¡6 hechas!", "Ya llevas el día ganado. Un té y sigues.", "img/teacup_without_handle_flat.svg"],
+  9: ["¡9! Estás imparable", "Respira, estírate y celébralo un poquito.", "img/glowing_star_flat.svg"],
+  all: ["Día completo ✨", "Terminaste todo lo de hoy. Ahora sí, a descansar con Monis.", "img/black_cat_flat.svg"],
+};
+const dlgFestejo = $("festejo");
+let festejoTimer;
+function maybeCelebrate() {
+  const today = todayKey();
+  const list = decorate();
+  const done = list.filter((t) => t.hecho && t.hechaEn === today).length;
+  const hoy = list.filter((t) => t._day === today);
+  const allDone = hoy.length >= 2 && hoy.every((t) => t.hecho);
+  let st = { day: today, hits: [] };
+  try { const s = JSON.parse(localStorage.getItem(FESTEJO_KEY)); if (s && s.day === today && Array.isArray(s.hits)) st = s; } catch (e) {}
+  let key = null;
+  if (allDone && !st.hits.includes("all")) key = "all";
+  else if (done >= 3 && done % 3 === 0 && !st.hits.includes(done)) key = done;
+  if (key === null) return;
+  st.hits.push(key);
+  try { localStorage.setItem(FESTEJO_KEY, JSON.stringify(st)); } catch (e) {}
+  setTimeout(() => showFestejo(key, done), 450);
+}
+function showFestejo(key, done) {
+  const [title, text, img] = FESTEJOS[key] || [`¡${done} hechas hoy!`, "Pasito a pasito, mira hasta dónde llegaste.", "img/cherry_blossom_flat.svg"];
+  $("festejo-title").textContent = title;
+  $("festejo-text").textContent = text;
+  $("festejo-img").src = img;
+  $("festejo-ok").textContent = key === "all" ? "A descansar 🌙" : "¡Sigo!";
+  if (dlgAviso.open) return; // no tapar el aviso de ejercicio
+  dlgFestejo.show();
+  leafRain();
+  clearTimeout(festejoTimer);
+  festejoTimer = setTimeout(() => dlgFestejo.close(), 7000);
+}
+function leafRain() {
+  const box = document.createElement("div");
+  box.className = "rain";
+  const srcs = ["img/maple_leaf_flat.svg", "img/fallen_leaf_flat.svg", "img/cherry_blossom_flat.svg"];
+  for (let i = 0; i < 18; i++) {
+    const im = document.createElement("img");
+    im.src = srcs[i % srcs.length]; im.alt = "";
+    im.style.left = `${Math.random() * 96}%`;
+    im.style.animationDelay = `${Math.random() * 0.9}s`;
+    im.style.animationDuration = `${2.4 + Math.random() * 1.6}s`;
+    box.appendChild(im);
+  }
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 5200);
+}
+$("festejo-ok").addEventListener("click", () => { clearTimeout(festejoTimer); dlgFestejo.close(); });
 
 // ---------- login con correo y contraseña ----------
 // La cuenta se crea desde el panel de Supabase; aquí solo se entra.
