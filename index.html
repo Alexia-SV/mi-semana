@@ -176,7 +176,9 @@ section{min-width:0}
 /* Semana */
 .week{display:grid;gap:10px;grid-template-columns:1fr}
 @media (min-width:640px){.week{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
-@media (min-width:1480px){.week{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}}
+@media (min-width:1480px){.week{grid-template-columns:repeat(var(--days,7),minmax(0,1fr));gap:8px}}
+.day-head .pend{min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:var(--hl);color:var(--hl-ink);font-size:12px;font-weight:800;display:inline-grid;place-items:center;font-variant-numeric:tabular-nums}
+.day-head .pend.done{background:var(--accent);color:var(--on-accent)}
 .day{background:var(--sunk);border-radius:14px;padding:8px;display:grid;gap:7px;align-content:start;min-width:0;border:2px solid transparent;transition:border-color .12s}
 @media (min-width:1480px){.day{min-height:360px}}
 .day.past{opacity:.66}
@@ -257,7 +259,22 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
 .field{display:grid;gap:6px}
 .field>label,.field>.lbl{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .ed input[type=text],.ed input[type=date],.ed select,.ed textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 11px;font-size:16px}
-.ed textarea{min-height:64px;resize:vertical}
+.ed textarea{min-height:64px;resize:none;overflow:hidden;field-sizing:content}
+.ed-cl{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ed-cl:empty{display:none}
+.ed-cl li{display:flex;gap:8px;align-items:center}
+.ed-cl input[type=checkbox]{accent-color:var(--accent);width:20px;height:20px;flex:none}
+.ed-cl input[type=text]{flex:1;min-width:0}
+.ed-cl button{flex:none;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:20px;line-height:1}
+.ed-cl button:hover{background:var(--sunk);color:var(--ink)}
+#ed-cl-add{justify-self:start}
+/* Pasos de la checklist dentro de la card (en Hoy se tachan ahí mismo) */
+.cl{grid-column:2;list-style:none;margin:2px 0 0;padding:0;display:grid;gap:1px}
+.cl-item{display:flex;gap:8px;align-items:flex-start;width:100%;border:0;background:transparent;padding:3px 0;text-align:left;font-size:13.5px;font-weight:600;color:var(--ink)}
+.cl-item .box{flex:none;width:17px;height:17px;margin-top:1px;border:1.5px solid var(--muted);border-radius:5px;display:grid;place-items:center;font-size:11px;font-weight:800}
+.cl-item.on .box{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.cl-item.on span:last-child{text-decoration:line-through;color:var(--muted)}
+.cl-chip.all{color:var(--accent)}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
 .seg label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:14px;font-weight:600;cursor:pointer}
 .seg label img{width:16px;height:16px}
@@ -595,7 +612,12 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
     <label class="chk"><input type="checkbox" id="ed-oblig"> Obligatorio o con fecha de entrega</label>
     <div class="field">
       <label for="ed-nota">Nota</label>
-      <textarea id="ed-nota" placeholder="Opcional"></textarea>
+      <textarea id="ed-nota" placeholder="Opcional" rows="2"></textarea>
+    </div>
+    <div class="field">
+      <span class="lbl">Checklist</span>
+      <ul class="ed-cl" id="ed-cl"></ul>
+      <button type="button" class="mini" id="ed-cl-add">+ Agregar paso</button>
     </div>
     <div class="ed-foot">
       <button type="button" class="danger" id="ed-delete">Eliminar</button>
@@ -770,7 +792,9 @@ const fromRow = (r) => ({
   titulo: r.titulo, area: r.area, sub: r.sub, dia: r.dia, hecho: r.hecho, hechaEn: r.hecha_en,
   obligatorio: r.obligatorio, nota: r.nota, repite: r.repite || [], siguiente: r.siguiente, creada: r.creada,
   foco: r.foco ?? null, // día en que la elegiste entre "tus 3 de hoy"
+  checklist: Array.isArray(r.checklist) ? r.checklist : [], // [{ id, texto, hecho }]
 });
+const checklistOf = (t) => (Array.isArray(t?.checklist) ? t.checklist : []);
 function toRow(data) {
   const row = { ...data };
   if ("hechaEn" in row) { row.hecha_en = row.hechaEn; delete row.hechaEn; }
@@ -915,6 +939,7 @@ window.addEventListener("offline", () => syncStatus());
 function handleWriteError(e) {
   // Sin la columna "foco" en Supabase, "tus 3 de hoy" no se pueden guardar.
   if (String(e?.message || "").includes("foco")) setStatus("Falta un paso en Supabase: corre el SQL de «tus 3 de hoy» (columna foco).", true);
+  else if (String(e?.message || "").includes("checklist")) setStatus("Falta un paso en Supabase: corre el SQL de la checklist (columna checklist).", true);
   else toast("No se guardó el cambio. Revisa tu conexión.");
   scheduleRefetch();
 }
@@ -1007,6 +1032,7 @@ function card(t, mode) {
     if (t.obligatorio) bits.push('<span class="flag" title="Obligatorio">⚑</span>');
     if (t._carry) bits.push(`<span class="carry">${carryLabel(t, false)}</span>`);
     if (Array.isArray(t.repite) && t.repite.length) bits.push(`<span class="soft" title="Se repite: ${repLabel(t.repite)}">↻</span>`);
+    bits.push(checklistChip(t));
     const nudge = t.hecho ? "" : `<span class="nudge">
       <button data-act="prev" aria-label="Pasar al día anterior"${prevBlocked ? " disabled" : ""}>‹</button>
       <button data-act="next" aria-label="Pasar al día siguiente">›</button></span>`;
@@ -1044,11 +1070,29 @@ function card(t, mode) {
   if (t._carry && (mode === "hoy" || mode === "stuck")) extras.push(`<span class="carry">${carryLabel(t, true)}</span>`);
   if (Array.isArray(t.repite) && t.repite.length) extras.push(`<span class="soft">↻ ${repLabel(t.repite)}</span>`);
   if (t.nota) extras.push(`<span class="soft" title="${esc(t.nota)}">· nota</span>`);
+  extras.push(checklistChip(t));
+  // En Hoy los pasos se pueden tachar sin abrir la tarea.
+  const pasos = mode === "hoy" && !t.hecho ? checklistInline(t) : "";
   return `<article class="card${t.hecho ? " done" : ""}" data-id="${esc(t.id)}"${drag}>
     ${head}
-    ${extras.length ? `<div class="meta">${extras.join("")}</div>` : ""}
+    ${extras.some(Boolean) ? `<div class="meta">${extras.join("")}</div>` : ""}
+    ${pasos}
     ${actions}
   </article>`;
+}
+
+// ---------- checklist de una tarea ----------
+function checklistChip(t) {
+  const items = checklistOf(t);
+  if (!items.length) return "";
+  const hechos = items.filter((i) => i.hecho).length;
+  return `<span class="soft cl-chip${hechos === items.length ? " all" : ""}" title="Checklist">☑ ${hechos}/${items.length}</span>`;
+}
+function checklistInline(t) {
+  const items = checklistOf(t);
+  if (!items.length) return "";
+  return `<ul class="cl">${items.map((i) =>
+    `<li><button type="button" class="cl-item${i.hecho ? " on" : ""}" data-act="check-item" data-item="${esc(i.id)}" aria-pressed="${!!i.hecho}"><span class="box" aria-hidden="true">${i.hecho ? "✓" : ""}</span><span>${esc(i.texto)}</span></button></li>`).join("")}</ul>`;
 }
 
 // ---------- hábitos: racha y semana ----------
@@ -1193,21 +1237,34 @@ function render() {
   // Semana
   const end = addDays(weekStart, 6);
   $("week-range").textContent = `${shortDate(weekStart)} – ${shortDate(end)}`;
+  // En la semana actual solo se ven hoy y los días que vienen (lo que no terminaste ya aparece en Hoy).
+  // Las semanas pasadas se ven completas con ‹, como historial.
+  const isThisWeek = weekStart === mondayOf(today);
   let html = "";
+  let shown = 0;
   for (let i = 0; i < 7; i++) {
     const dk = addDays(weekStart, i);
+    if (isThisWeek && dk < today) continue;
+    shown++;
     const items = list.filter((t) => t._day === dk).sort(sortGrouped);
+    const pendientes = items.filter((t) => !t.hecho).length;
     const cls = dk === today ? " today" : dk < today ? " past" : "";
+    // Cuántos pendientes le quedan al día: baja al tachar y llega a ✓.
+    const count = !items.length ? ""
+      : pendientes ? `<span class="pend" title="${pendientes} ${pendientes === 1 ? "pendiente" : "pendientes"}">${pendientes}</span>`
+      : '<span class="pend done" title="Todo hecho">✓</span>';
     html += `<div class="day${cls}" data-drop="${dk}">
       <div class="day-head">
         <span class="dn">${DIAS[i]}</span><span class="dd">${parseKey(dk).getDate()}</span>
         ${dk === today ? '<span class="tag">Hoy</span>' : ""}
+        ${count}
         <button class="add" data-act="addday" data-day="${dk}" aria-label="Agregar al ${DIAS_L[i]}">+</button>
       </div>
       <div class="day-items">${items.map((t) => card(t, "day")).join("")}</div>
     </div>`;
   }
   $("week").innerHTML = html;
+  $("week").style.setProperty("--days", shown);
 
   // Sin día
   const sinAll = list.filter((t) => t.area && !t.dia && !t.hecho);
@@ -1245,6 +1302,8 @@ function toggleDone(id, extra = {}) {
       insertTask(nid, {
         titulo: t.titulo, area: t.area || null, sub: t.sub || null, obligatorio: !!t.obligatorio, nota: t.nota || "",
         repite: rep, dia: next, hecho: false, hechaEn: null, siguiente: null, creada: new Date().toISOString(),
+        // La siguiente trae los mismos pasos, sin tachar.
+        ...(checklistOf(t).length ? { checklist: checklistOf(t).map((i) => ({ ...i, hecho: false })) } : {}),
       });
     }
     patch(id, upd);
@@ -1263,7 +1322,7 @@ function toggleDone(id, extra = {}) {
 function patchUndoable(id, data, msg) {
   const t = tasks.get(id); if (!t) return;
   const prev = {};
-  for (const k of Object.keys(data)) prev[k] = t[k] ?? (k === "repite" ? [] : k === "nota" ? "" : null);
+  for (const k of Object.keys(data)) prev[k] = t[k] ?? (k === "repite" || k === "checklist" ? [] : k === "nota" ? "" : null);
   patch(id, data);
   toast(msg, () => patch(id, prev));
 }
@@ -1345,6 +1404,11 @@ document.addEventListener("click", (e) => {
     case "addday": openEditor(null, el.dataset.day); break;
     case "setday": setDay(id, el.dataset.day); break;
     case "drop": removeUndoable(id); break;
+    case "check-item": {
+      const t = tasks.get(id);
+      if (t) patch(id, { checklist: checklistOf(t).map((i) => (i.id === el.dataset.item ? { ...i, hecho: !i.hecho } : i)) });
+      break;
+    }
     case "plan": openPlan(); break;
     case "review": openReview(); break;
   }
@@ -1490,11 +1554,53 @@ function openEditor(id, presetDay) {
   const rep = Array.isArray(t.repite) ? t.repite : [];
   document.querySelectorAll("#ed-rep input").forEach((c) => (c.checked = rep.includes(Number(c.value))));
   $("ed-nota").value = t.nota || "";
+  edChecklist = checklistOf(t).map((i) => ({ ...i }));
+  renderEdChecklist();
   const del = $("ed-delete");
   del.hidden = !id; del.classList.remove("armed"); del.textContent = "Eliminar";
   dlg.showModal();
+  autoGrow($("ed-nota"));
   if (!id) $("ed-titulo").focus();
 }
+
+// La nota crece conforme escribes, sin scroll adentro.
+function autoGrow(el) {
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight + 2}px`;
+}
+$("ed-nota").addEventListener("input", (e) => autoGrow(e.target));
+
+// Checklist del editor: se guarda al tocar "Guardar", junto con lo demás.
+let edChecklist = [];
+function renderEdChecklist(focusLast) {
+  $("ed-cl").innerHTML = edChecklist.map((i, n) => `<li>
+      <input type="checkbox" data-cl-check="${n}" aria-label="Paso hecho"${i.hecho ? " checked" : ""}>
+      <input type="text" data-cl-text="${n}" value="${esc(i.texto)}" placeholder="Paso ${n + 1}" aria-label="Paso ${n + 1}" enterkeyhint="next">
+      <button type="button" data-cl-del="${n}" aria-label="Quitar paso ${n + 1}">×</button>
+    </li>`).join("");
+  if (focusLast) $("ed-cl").querySelector("li:last-child input[type=text]")?.focus();
+}
+function addEdStep() {
+  edChecklist.push({ id: crypto.randomUUID().slice(0, 8), texto: "", hecho: false });
+  renderEdChecklist(true);
+}
+$("ed-cl-add").addEventListener("click", addEdStep);
+$("ed-cl").addEventListener("input", (e) => {
+  if (e.target.dataset.clText !== undefined) edChecklist[Number(e.target.dataset.clText)].texto = e.target.value;
+});
+$("ed-cl").addEventListener("change", (e) => {
+  if (e.target.dataset.clCheck !== undefined) edChecklist[Number(e.target.dataset.clCheck)].hecho = e.target.checked;
+});
+$("ed-cl").addEventListener("click", (e) => {
+  const del = e.target.closest("[data-cl-del]");
+  if (!del) return;
+  edChecklist.splice(Number(del.dataset.clDel), 1);
+  renderEdChecklist();
+});
+// Enter en un paso agrega el siguiente (en lugar de guardar todo).
+$("ed-cl").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.dataset.clText !== undefined) { e.preventDefault(); addEdStep(); }
+});
 $("ed-area").addEventListener("change", (e) => fillSubs(e.target.value, null));
 $("ed-cancel").addEventListener("click", () => dlg.close());
 document.querySelectorAll("[data-ed]").forEach((b) => b.addEventListener("click", () => {
@@ -1521,6 +1627,9 @@ $("ed-form").addEventListener("submit", (e) => {
     repite: [...document.querySelectorAll("#ed-rep input:checked")].map((c) => Number(c.value)),
     nota: $("ed-nota").value.trim(),
   };
+  // La checklist solo se envía si tiene pasos o si antes tenía (así, sin la columna en Supabase, lo demás sigue funcionando).
+  const checklist = edChecklist.filter((i) => i.texto.trim()).map((i) => ({ ...i, texto: i.texto.trim() }));
+  if (checklist.length || checklistOf(edId ? tasks.get(edId) : null).length) data.checklist = checklist;
   dlg.close();
   if (edId) patchUndoable(edId, data, "Guardado");
   else { addTask(data); toast("Agregado"); }
@@ -1930,6 +2039,11 @@ if (DEMO) {
   const hace = (n) => new Date(Date.now() - n * 864e5).toISOString();
   demo.forEach(([titulo, area, sub, dia, hecho, repite, obligatorio], i) =>
     tasks.set("demo" + i, { titulo, area, sub, dia, hecho, hechaEn: hecho ? t0 : null, repite, obligatorio: !!obligatorio, nota: "", creada: hace(6) }));
+  tasks.get("demo4").checklist = [
+    { id: "c1", texto: "Leer los mensajes nuevos", hecho: true },
+    { id: "c2", texto: "Mover lo pendiente a Simcha", hecho: false },
+    { id: "c3", texto: "Avisar a David", hecho: false },
+  ];
   // Historial de hábitos de los últimos días para ver rachas y puntitos.
   [[1, "Ejercicio", ""], [2, "Ejercicio", "Hoy fue descanso 🌙"], [3, "Ejercicio", ""], [1, "Cuidado", ""], [2, "Cuidado", ""], [4, "Cuidado", "Hoy no me maquillé"]]
     .forEach(([n, sub, nota], i) => tasks.set("demoh" + i, { titulo: sub === "Ejercicio" ? "Hacer ejercicio" : "Desmaquillarme", area: "casa", sub, dia: addDays(t0, -n), hecho: true, hechaEn: addDays(t0, -n), repite: [], obligatorio: false, nota, creada: hace(6) }));
