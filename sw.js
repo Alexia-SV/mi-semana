@@ -2,7 +2,7 @@
 // La página siempre intenta traer la versión nueva primero; si no hay red, usa la guardada.
 // Lo demás (iconos, fuentes, librería de Supabase) se sirve de la copia y se actualiza por detrás.
 // Los datos de Supabase nunca pasan por aquí.
-const VERSION = "mi-semana-v2";
+const VERSION = "mi-semana-v3";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
