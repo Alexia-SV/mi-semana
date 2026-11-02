@@ -14,6 +14,7 @@ create policy "mis suscripciones" on public.push_subs
   using (user_id = (select auth.uid()))
   with check (user_id = (select auth.uid()));
 
+-- La función se publicó en Supabase con el nombre bright-processor (código en supabase/functions/recordatorios).
 -- 2) Horarios (hora del centro de México = UTC-6). Reemplaza CRON_SECRET por el valor de tu archivo de secretos.
 --    11:00 p. m. rutina de noche · 12:30 a. m. "antes de dormir" · 10:00 a. m. obligatorios de hoy y mañana
 create extension if not exists pg_net;
@@ -21,7 +22,7 @@ create extension if not exists pg_cron;
 
 select cron.schedule('mi-semana-noche', '0 5 * * *', $$
   select net.http_post(
-    url := 'https://yuusedshkqztfzofcasq.supabase.co/functions/v1/recordatorios',
+    url := 'https://yuusedshkqztfzofcasq.supabase.co/functions/v1/bright-processor',
     headers := '{"Content-Type": "application/json", "x-cron-secret": "CRON_SECRET"}'::jsonb,
     body := '{"tipo": "noche"}'::jsonb
   );
@@ -29,7 +30,7 @@ $$);
 
 select cron.schedule('mi-semana-antes-de-dormir', '30 6 * * *', $$
   select net.http_post(
-    url := 'https://yuusedshkqztfzofcasq.supabase.co/functions/v1/recordatorios',
+    url := 'https://yuusedshkqztfzofcasq.supabase.co/functions/v1/bright-processor',
     headers := '{"Content-Type": "application/json", "x-cron-secret": "CRON_SECRET"}'::jsonb,
     body := '{"tipo": "noche", "segundo": true}'::jsonb
   );
@@ -37,7 +38,7 @@ $$);
 
 select cron.schedule('mi-semana-manana', '0 16 * * *', $$
   select net.http_post(
-    url := 'https://yuusedshkqztfzofcasq.supabase.co/functions/v1/recordatorios',
+    url := 'https://yuusedshkqztfzofcasq.supabase.co/functions/v1/bright-processor',
     headers := '{"Content-Type": "application/json", "x-cron-secret": "CRON_SECRET"}'::jsonb,
     body := '{"tipo": "manana"}'::jsonb
   );

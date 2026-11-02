@@ -1837,7 +1837,9 @@ if ("serviceWorker" in navigator && !DEMO) navigator.serviceWorker.register("sw.
 // ---------- notificaciones con la app cerrada ----------
 // La campana suscribe este dispositivo; la función "recordatorios" de Supabase manda los avisos.
 // En iPhone solo funciona desde la app agregada a la pantalla de inicio (iOS 16.4 o más nuevo).
-const VAPID_PUBLIC = "BJBEOgU7G8TIv34EOAxmiZTCNa_sbQ-4wQbKc4iXg4uIlwHDPxXtI6KrCWqqmtVZ0RfRiWJc9qhC5P3TG9PaTCs";
+// Nombre con que Supabase publicó la función de supabase/functions/recordatorios (lo asignó solo).
+const RECORDATORIOS_FN = "bright-processor";
+const VAPID_PUBLIC ="BJBEOgU7G8TIv34EOAxmiZTCNa_sbQ-4wQbKc4iXg4uIlwHDPxXtI6KrCWqqmtVZ0RfRiWJc9qhC5P3TG9PaTCs";
 const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 const isStandalone = () => navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
 function b64ToBytes(s) {
@@ -1882,7 +1884,7 @@ $("bell-btn").addEventListener("click", async () => {
     const { error } = await sb.from("push_subs").upsert({ endpoint: sub.endpoint, p256dh: keys.p256dh, auth: keys.auth });
     if (error) { toast("No se pudo guardar. ¿Ya corriste el SQL de notificaciones?"); return; }
     syncBell();
-    const { error: e2 } = await sb.functions.invoke("recordatorios", { body: { tipo: "prueba" } });
+    const { error: e2 } = await sb.functions.invoke(RECORDATORIOS_FN, { body: { tipo: "prueba" } });
     toast(e2 ? "Notificaciones activadas 🔔 (la de prueba no salió: revisa la función en Supabase)" : "Notificaciones activadas 🔔 Te mandé una de prueba");
   } catch (e) {
     toast("No se pudieron activar las notificaciones en este dispositivo.");
