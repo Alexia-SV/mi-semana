@@ -611,13 +611,13 @@ dialog::backdrop{background:rgba(12,10,20,.5)}
     </div>
     <label class="chk"><input type="checkbox" id="ed-oblig"> Obligatorio o con fecha de entrega</label>
     <div class="field">
-      <label for="ed-nota">Nota</label>
-      <textarea id="ed-nota" placeholder="Opcional" rows="2"></textarea>
-    </div>
-    <div class="field">
       <span class="lbl">Checklist</span>
       <ul class="ed-cl" id="ed-cl"></ul>
       <button type="button" class="mini" id="ed-cl-add">+ Agregar paso</button>
+    </div>
+    <div class="field">
+      <label for="ed-nota">Nota</label>
+      <textarea id="ed-nota" placeholder="Opcional" rows="2"></textarea>
     </div>
     <div class="ed-foot">
       <button type="button" class="danger" id="ed-delete">Eliminar</button>
@@ -1069,8 +1069,8 @@ function card(t, mode) {
   if (t.obligatorio) extras.push('<span class="flag">⚑ Obligatorio</span>');
   if (t._carry && (mode === "hoy" || mode === "stuck")) extras.push(`<span class="carry">${carryLabel(t, true)}</span>`);
   if (Array.isArray(t.repite) && t.repite.length) extras.push(`<span class="soft">↻ ${repLabel(t.repite)}</span>`);
-  if (t.nota) extras.push(`<span class="soft" title="${esc(t.nota)}">· nota</span>`);
   extras.push(checklistChip(t));
+  if (t.nota) extras.push(`<span class="soft" title="${esc(t.nota)}">· nota</span>`);
   // En Hoy los pasos se pueden tachar sin abrir la tarea.
   const pasos = mode === "hoy" && !t.hecho ? checklistInline(t) : "";
   return `<article class="card${t.hecho ? " done" : ""}" data-id="${esc(t.id)}"${drag}>
