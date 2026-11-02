@@ -2,7 +2,7 @@
 // La página siempre intenta traer la versión nueva primero; si no hay red, usa la guardada.
 // Lo demás (iconos, fuentes, librería de Supabase) se sirve de la copia y se actualiza por detrás.
 // Los datos de Supabase nunca pasan por aquí.
-const VERSION = "mi-semana-v3";
+const VERSION = "mi-semana-v4";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
@@ -47,8 +47,10 @@ self.addEventListener("fetch", (event) => {
   if (url.hostname.endsWith("supabase.co")) return;
 
   if (req.mode === "navigate") {
+    // `no-cache`: siempre pregunta al servidor por la versión nueva (GitHub Pages deja que el
+    // navegador reuse la página 10 min, y así veías cambios viejos después de una actualización).
     event.respondWith(
-      fetch(req)
+      fetch(req.url, { cache: "no-cache", credentials: "same-origin" })
         .then((res) => {
           const copy = res.clone();
           caches.open(VERSION).then((cache) => cache.put("./index.html", copy));
