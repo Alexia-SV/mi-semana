@@ -240,6 +240,12 @@ section{min-width:0}
 @media (hover:none){.nudge{opacity:1}}
 .nudge button{width:26px;height:24px;border:1px solid var(--line);background:var(--surface);border-radius:7px;font-size:14px;font-weight:800;padding:0;line-height:1}
 .nudge button:disabled{opacity:.35;cursor:default}
+/* ▲ ▼ de las cards de Hoy: a la derecha, a la altura del título */
+.card.has-order{grid-template-columns:auto minmax(0,1fr) auto}
+.card .order{grid-column:3;grid-row:1 / span 2;display:flex;flex-direction:column;gap:4px}
+.card .order button{width:30px;height:26px;border:1px solid var(--line);background:var(--surface);border-radius:8px;font-size:15px;font-weight:800;line-height:1;padding:0;color:var(--ink)}
+.card .order button:hover:not(:disabled){background:var(--sunk)}
+.card .order button:disabled{opacity:.3;cursor:default}
 
 /* Pestañas Sin día */
 .tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
@@ -793,6 +799,7 @@ const fromRow = (r) => ({
   obligatorio: r.obligatorio, nota: r.nota, repite: r.repite || [], siguiente: r.siguiente, creada: r.creada,
   foco: r.foco ?? null, // día en que la elegiste entre "tus 3 de hoy"
   checklist: Array.isArray(r.checklist) ? r.checklist : [], // [{ id, texto, hecho }]
+  orden: r.orden ?? null, // lugar que le diste con ▲ ▼ dentro de su grupo (null = al final)
 });
 const checklistOf = (t) => (Array.isArray(t?.checklist) ? t.checklist : []);
 function toRow(data) {
@@ -940,6 +947,7 @@ function handleWriteError(e) {
   // Sin la columna "foco" en Supabase, "tus 3 de hoy" no se pueden guardar.
   if (String(e?.message || "").includes("foco")) setStatus("Falta un paso en Supabase: corre el SQL de «tus 3 de hoy» (columna foco).", true);
   else if (String(e?.message || "").includes("checklist")) setStatus("Falta un paso en Supabase: corre el SQL de la checklist (columna checklist).", true);
+  else if (String(e?.message || "").includes("orden")) setStatus("Falta un paso en Supabase: corre el SQL para ordenar tareas (columna orden).", true);
   else toast("No se guardó el cambio. Revisa tu conexión.");
   scheduleRefetch();
 }
@@ -984,8 +992,10 @@ function decorate() {
     return { id, ...t, _carry: carry, _day: carry ? today : t.dia || null };
   });
 }
+// Primero lo pendiente; luego el orden que tú le diste con ▲ ▼; luego obligatorios y lo más viejo.
 const sortItems = (a, b) =>
   (a.hecho ? 1 : 0) - (b.hecho ? 1 : 0) ||
+  (a.orden ?? Infinity) - (b.orden ?? Infinity) ||
   (b.obligatorio ? 1 : 0) - (a.obligatorio ? 1 : 0) ||
   String(a.creada || "").localeCompare(String(b.creada || ""));
 
@@ -1033,7 +1043,10 @@ function card(t, mode) {
     if (t._carry) bits.push(`<span class="carry">${carryLabel(t, false)}</span>`);
     if (Array.isArray(t.repite) && t.repite.length) bits.push(`<span class="soft" title="Se repite: ${repLabel(t.repite)}">↻</span>`);
     bits.push(checklistChip(t));
+    const pos = t.hecho ? null : orderPosition(t, "day");
     const nudge = t.hecho ? "" : `<span class="nudge">
+      <button data-act="up" data-where="day" aria-label="Subir"${pos.first ? " disabled" : ""}>▴</button>
+      <button data-act="down" data-where="day" aria-label="Bajar"${pos.last ? " disabled" : ""}>▾</button>
       <button data-act="prev" aria-label="Pasar al día anterior"${prevBlocked ? " disabled" : ""}>‹</button>
       <button data-act="next" aria-label="Pasar al día siguiente">›</button></span>`;
     return `<article class="card compact${t.hecho ? " done" : ""}" data-id="${esc(t.id)}"${drag}>
@@ -1073,12 +1086,47 @@ function card(t, mode) {
   if (t.nota) extras.push(`<span class="soft" title="${esc(t.nota)}">· nota</span>`);
   // En Hoy los pasos se pueden tachar sin abrir la tarea.
   const pasos = mode === "hoy" && !t.hecho ? checklistInline(t) : "";
-  return `<article class="card${t.hecho ? " done" : ""}" data-id="${esc(t.id)}"${drag}>
+  // ▲ ▼ para acomodar el orden en que vas a hacer las cosas (dentro de su grupo).
+  const pos = mode === "hoy" && !t.hecho ? orderPosition(t, "hoy") : null;
+  const order = pos && !(pos.first && pos.last) ? `<div class="order">
+      <button type="button" data-act="up" data-where="hoy" aria-label="Subir"${pos.first ? " disabled" : ""}>▴</button>
+      <button type="button" data-act="down" data-where="hoy" aria-label="Bajar"${pos.last ? " disabled" : ""}>▾</button>
+    </div>` : "";
+  return `<article class="card${t.hecho ? " done" : ""}${order ? " has-order" : ""}" data-id="${esc(t.id)}"${drag}>
     ${head}
+    ${order}
     ${extras.some(Boolean) ? `<div class="meta">${extras.join("")}</div>` : ""}
     ${pasos}
     ${actions}
   </article>`;
+}
+
+// ---------- orden manual (▲ ▼) ----------
+// Se acomoda dentro del mismo grupo en que se ve la tarea: en Hoy, "Tus 3 de hoy" entre sí y cada área
+// (Trabajo, Uni, Casa…) entre sí; en la semana, cada área dentro de su día.
+function orderSiblings(t, where) {
+  const today = todayKey();
+  const pendientes = decorate().filter((x) => !x.hecho && x._day === t._day);
+  const enFoco = (x) => where === "hoy" && t._day === today && x.foco === today;
+  const sibs = enFoco(t)
+    ? pendientes.filter(enFoco)
+    : pendientes.filter((x) => !enFoco(x) && groupKey(x) === groupKey(t));
+  return sibs.sort(sortItems);
+}
+function orderPosition(t, where) {
+  const sibs = orderSiblings(t, where);
+  const i = sibs.findIndex((x) => x.id === t.id);
+  return { first: i <= 0, last: i === sibs.length - 1 };
+}
+function moveOrder(id, dir, where) {
+  const t = decorate().find((x) => x.id === id); if (!t) return;
+  const sibs = orderSiblings(t, where);
+  const i = sibs.findIndex((x) => x.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= sibs.length) return;
+  [sibs[i], sibs[j]] = [sibs[j], sibs[i]];
+  // Se numera todo el grupo (1, 2, 3…) para que el orden quede fijo en todos tus dispositivos.
+  sibs.forEach((x, n) => { if (x.orden !== n + 1) patch(x.id, { orden: n + 1 }); });
 }
 
 // ---------- checklist de una tarea ----------
@@ -1304,6 +1352,8 @@ function toggleDone(id, extra = {}) {
         repite: rep, dia: next, hecho: false, hechaEn: null, siguiente: null, creada: new Date().toISOString(),
         // La siguiente trae los mismos pasos, sin tachar.
         ...(checklistOf(t).length ? { checklist: checklistOf(t).map((i) => ({ ...i, hecho: false })) } : {}),
+        // Y conserva su lugar dentro del grupo.
+        ...(t.orden != null ? { orden: t.orden } : {}),
       });
     }
     patch(id, upd);
@@ -1404,6 +1454,8 @@ document.addEventListener("click", (e) => {
     case "addday": openEditor(null, el.dataset.day); break;
     case "setday": setDay(id, el.dataset.day); break;
     case "drop": removeUndoable(id); break;
+    case "up": moveOrder(id, -1, el.dataset.where); break;
+    case "down": moveOrder(id, 1, el.dataset.where); break;
     case "check-item": {
       const t = tasks.get(id);
       if (t) patch(id, { checklist: checklistOf(t).map((i) => (i.id === el.dataset.item ? { ...i, hecho: !i.hecho } : i)) });

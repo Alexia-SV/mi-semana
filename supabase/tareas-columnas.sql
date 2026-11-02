@@ -3,3 +3,5 @@
 alter table public.tareas add column if not exists foco date;
 -- Checklist de cada tarea: [{ "id": "...", "texto": "...", "hecho": false }]
 alter table public.tareas add column if not exists checklist jsonb not null default '[]'::jsonb;
+-- Orden manual de las tareas dentro de su grupo (botones ▲ ▼).
+alter table public.tareas add column if not exists orden double precision;
